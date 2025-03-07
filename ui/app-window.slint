@@ -1,0 +1,91 @@
+import { AboutSlint, VerticalBox, Button, Slider } from "std-widgets.slint";
+
+export component MainWindow inherits Window {
+    width: 370px;
+    height: 145px;
+    //no-frame: true;
+    callback play();
+    callback open();
+    //this is album
+    Rectangle {
+        height: 110px;
+        width: 110px;
+        x: 18px;
+        clip: true;
+        border-radius: 5px;
+        Album := Image {
+            in property <image> album_url: @image-url("C:\\Users\\30789\\Pictures\\头像.jpg");
+            height: parent.height;
+            width: parent.width;
+            source: album_url;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+    }
+    //this is play button
+    Rectangle {
+        x: 150px;
+        y: 86px;
+        //background: green;
+        width: 200px;
+        height: 50px;
+        playc:=Rectangle {
+            x:parent.x/2;
+            width: 40px;
+            height: self.width;
+            border-radius: self.width/2;
+            clip: true;
+            background: #b7b7b7;
+            Button {
+                width: parent.width + 2px;
+                height: parent.height + 2px;
+                
+                clicked => {
+                    root.play();
+                }
+            }
+        }
+        //left
+        Rectangle {
+            x:parent.x/2 - 39px;
+            width: 35px;
+            height: self.width;
+            border-radius: self.width/2;
+            clip: true;
+            background: #b7b7b7;
+            Button {
+                width: parent.width + 2px;
+                height: parent.height + 2px;
+            }
+        }
+        //right
+        Rectangle {
+            x:parent.x/2 + 43px;
+            width: 35px;
+            height: self.width;
+            border-radius: self.width/2;
+            clip: true;
+            background: #b7b7b7;
+            Button {
+                width: parent.width + 2px;
+                height: parent.height + 2px;
+            }
+        }
+        //open button
+        Rectangle {
+            x:parent.x/2 - 73px;
+            width: 30px;
+            height: self.width;
+            border-radius: self.width/2;
+            clip: true;
+            background: #b7b7b7;
+            Button {
+                width: parent.width + 2px;
+                height: parent.height + 2px;
+                clicked => {
+                    root.open();
+                }
+            }
+        }
+    }
+}
