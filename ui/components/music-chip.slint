@@ -1,0 +1,70 @@
+import { FocusTouchArea } from "focus-touch-area.slint";
+import { MusicPalette, MusicTypography } from "theme.slint";
+
+export component MusicChip inherits Rectangle {
+    in property <string> label;
+    in property <bool> show-icon: false;
+    in property <image> icon-source;
+    in property <length> icon-size: 14px;
+    in property <bool> active: false;
+    in property <bool> enabled: true;
+    in property <bool> fill-width: false;
+    in property <brush> active-background: MusicPalette.accent;
+    in property <brush> inactive-background: MusicPalette.surface-2;
+    in property <brush> active-foreground: MusicPalette.shell;
+    in property <brush> inactive-foreground: MusicPalette.text-secondary;
+    callback clicked;
+
+    preferred-height: 32px;
+    min-height: 32px;
+    max-height: 32px;
+    preferred-width: root.fill-width ? 0px : label-text.min-width + (root.show-icon ? root.icon-size + 40px : 24px);
+    min-width: label-text.min-width + (root.show-icon ? root.icon-size + 40px : 24px);
+    max-width: root.fill-width ? 4096px : self.preferred-width;
+    horizontal-stretch: root.fill-width ? 1 : 0;
+    vertical-stretch: 0;
+    border-radius: self.height / 2;
+    clip: true;
+    background: active
+        ? (touch.pressed ? active-background.darker(15%) : active-background)
+        : (touch.pressed ? inactive-background.darker(10%) : inactive-background);
+    accessible-role: button;
+    accessible-action-default => { touch.clicked(); }
+
+    touch := FocusTouchArea {
+        width: 100%;
+        height: 100%;
+        enabled: root.enabled;
+        mouse-cursor: enabled ? pointer : default;
+
+        clicked => {
+            if root.enabled {
+                root.clicked();
+            }
+        }
+    }
+
+    if root.show-icon : chip-icon := Image {
+        x: 12px;
+        y: (parent.height - root.icon-size) / 2;
+        width: root.icon-size;
+        height: root.icon-size;
+        source: root.icon-source;
+        colorize: root.active ? root.active-foreground : root.inactive-foreground;
+        image-fit: contain;
+    }
+
+    label-text := Text {
+        x: root.show-icon ? root.icon-size + 20px : 12px;
+        y: 0px;
+        width: parent.width - (root.show-icon ? root.icon-size + 32px : 24px);
+        height: parent.height;
+        text: root.label;
+        color: root.active ? root.active-foreground : root.inactive-foreground;
+        font-family: MusicTypography.mono-family;
+        font-size: MusicTypography.chip-size;
+        font-weight: FontWeight.medium;
+        horizontal-alignment: root.show-icon ? left : center;
+        vertical-alignment: center;
+    }
+}

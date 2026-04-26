@@ -1,0 +1,586 @@
+import { MusicPalette, MusicTypography } from "./components/theme.slint";
+import { MusicIcons } from "./components/icons.slint";
+import { TagData, ModeOption, QueueTrack, LyricLineData } from "./components/types.slint";
+import { MusicChip } from "./components/music-chip.slint";
+import { TransportButton } from "./components/transport-button.slint";
+import { MeterBar } from "./components/meter-bar.slint";
+import { ActionCard } from "./components/action-card.slint";
+import { QueueItem } from "./components/queue-item.slint";
+import { LyricLine } from "./components/lyric-line.slint";
+
+export component AppWindow inherits Window {
+    title: "FFMusicRE";
+    preferred-width: 1440px;
+    preferred-height: 960px;
+    min-width: 1180px;
+    min-height: 860px;
+    default-font-family: MusicTypography.body-family;
+    default-font-size: MusicTypography.body-size;
+    background: MusicPalette.shell;
+
+    in-out property <string> collection-note: "Album art anchors the player and keeps the current song visually identifiable.";
+    in-out property <string> format-label: "FLAC 24-bit";
+    in-out property <string> song-title: "After Rain Comes Color";
+    in-out property <string> song-artist: "Mira Hoshino · Midnight Transit EP";
+    in-out property <string> song-meta: "BPM 92  ·  Key Fm  ·  Local Library";
+    in-out property <string> elapsed-label: "01:24";
+    in-out property <string> duration-label: "04:12";
+    in-out property <string> lyrics-subtitle: "Centered on the current phrase for low-distraction reading.";
+    in-out property <string> next-lyric-hint: "Next: We stay until the morning bends";
+    in-out property <string> queue-subtitle: "Playback order, import actions, and the upcoming tracks.";
+    in-out property <string> queue-loaded-label: "05 loaded";
+    in-out property <float> progress: 0.295;
+    in-out property <float> volume: 0.68;
+    in-out property <bool> playing: true;
+    in-out property <[TagData]> cover-tags: [
+        { label: "Lo-fi Vocal", accent: true },
+        { label: "34 tracks", accent: false },
+    ];
+    in-out property <[ModeOption]> playback-modes: [
+        { label: "Sequence", active: true },
+        { label: "Shuffle", active: false },
+        { label: "Repeat one", active: false },
+    ];
+    in-out property <[QueueTrack]> queue-model: [
+        { order: "01", title: "After Rain Comes Color", artist: "Mira Hoshino", duration: "04:12", active: true },
+        { order: "02", title: "Blue Static on the Platform", artist: "Mira Hoshino", duration: "03:46", active: false },
+        { order: "03", title: "Glass Constellation", artist: "North Exit", duration: "05:03", active: false },
+        { order: "04", title: "Stay Until Morning", artist: "Lantern Arcade", duration: "04:48", active: false },
+        { order: "05", title: "Neon Ferry Home", artist: "Night Signal", duration: "03:31", active: false },
+    ];
+    in-out property <[LyricLineData]> lyric-model: [
+        { text: "Streetlights blur into silver dust", active: false, muted: true },
+        { text: "You trace the night across the glass", active: false, muted: false },
+        { text: "I hear your color breaking through the rain", active: true, muted: false },
+        { text: "Every quiet echo calls your name", active: false, muted: false },
+        { text: "And the city starts to move again", active: false, muted: true },
+    ];
+
+    callback previous-track();
+    callback toggle-play();
+    callback next-track();
+    callback seek-requested(float);
+    callback volume-requested(float);
+    callback playback-mode-selected(int);
+    callback open-file();
+    callback open-folder();
+    callback queue-item-selected(int);
+    callback lyric-line-selected(int);
+    callback toggle-queue-visibility();
+    callback toggle-sync();
+
+    private property <image> volume-icon: root.volume <= 0.01
+        ? MusicIcons.volume-off
+        : (root.volume < 0.34
+            ? MusicIcons.volume-low
+            : (root.volume < 0.67 ? MusicIcons.volume-mid : MusicIcons.volume-high));
+
+    Rectangle {
+        width: parent.width;
+        height: parent.height;
+        background: @linear-gradient(180deg, MusicPalette.app-background-start, MusicPalette.app-background-end);
+
+        shell := Rectangle {
+            x: 40px;
+            y: 40px;
+            width: parent.width - 80px;
+            height: parent.height - 80px;
+            border-radius: 28px;
+            background: MusicPalette.shell;
+            clip: true;
+            drop-shadow-offset-x: 0px;
+            drop-shadow-offset-y: 20px;
+            drop-shadow-color: MusicPalette.shadow;
+            drop-shadow-blur: 40px;
+
+            HorizontalLayout {
+                padding: 24px;
+                spacing: 24px;
+                alignment: stretch;
+
+                left-column := Rectangle {
+                    background: transparent;
+                    preferred-width: 860px;
+                    horizontal-stretch: 1;
+
+                    VerticalLayout {
+                        spacing: 24px;
+                        alignment: stretch;
+
+                        hero := Rectangle {
+                            background: transparent;
+                            preferred-height: 360px;
+                            min-height: 360px;
+
+                            HorizontalLayout {
+                                spacing: 24px;
+                                alignment: stretch;
+
+                                cover-card := Rectangle {
+                                    preferred-width: 360px;
+                                    min-width: 360px;
+                                    max-width: 360px;
+                                    horizontal-stretch: 0;
+                                    background: MusicPalette.surface-0;
+                                    border-radius: 24px;
+
+                                    VerticalLayout {
+                                        padding: 18px;
+                                        spacing: 14px;
+                                        alignment: stretch;
+
+                                        art-frame := Rectangle {
+                                            preferred-height: 250px;
+                                            min-height: 250px;
+                                            max-height: 250px;
+                                            border-radius: 18px;
+                                            clip: true;
+                                            background: #203244;
+
+                                            Image {
+                                                width: parent.width;
+                                                height: parent.height;
+                                                
+                                                source: @image-url("images/generated-1777196145294.png");
+                                                image-fit: cover;
+                                            }
+                                        }
+
+                                        HorizontalLayout {
+                                            spacing: 10px;
+                                            alignment: stretch;
+
+                                            for tag[index] in root.cover-tags : MusicChip {
+                                                label: tag.label;
+                                                active: tag.accent;
+                                                inactive-background: MusicPalette.surface-2;
+                                                inactive-foreground: MusicPalette.text-secondary;
+                                            }
+                                        }
+
+                                        Text {
+                                            text: root.collection-note;
+                                            color: MusicPalette.text-secondary;
+                                            font-family: MusicTypography.body-family;
+                                            font-size: 14px;
+                                            wrap: word-wrap;
+                                            horizontal-alignment: left;
+                                        }
+                                    }
+                                }
+
+                                control-card := Rectangle {
+                                    horizontal-stretch: 1;
+                                    background: MusicPalette.surface-0;
+                                    border-radius: 24px;
+
+                                    VerticalLayout {
+                                        padding: 24px;
+                                        spacing: 18px;
+                                        alignment: stretch;
+
+                                        HorizontalLayout {
+                                            alignment: stretch;
+
+                                            MusicChip {
+                                                label: "Now Playing";
+                                                active: true;
+                                                enabled: false;
+                                            }
+
+                                            Text {
+                                                text: root.format-label;
+                                                color: MusicPalette.text-muted;
+                                                font-family: MusicTypography.mono-family;
+                                                font-size: MusicTypography.meta-size;
+                                                horizontal-alignment: right;
+                                                vertical-alignment: center;
+                                                horizontal-stretch: 1;
+                                            }
+                                        }
+
+                                        Text {
+                                            text: root.song-title;
+                                            color: MusicPalette.text-primary;
+                                            font-family: MusicTypography.heading-family;
+                                            font-size: MusicTypography.title-size;
+                                            font-weight: FontWeight.bold;
+                                            wrap: word-wrap;
+                                            horizontal-alignment: left;
+                                            
+                                        }
+
+                                        Text {
+                                            text: root.song-artist;
+                                            color: MusicPalette.text-secondary;
+                                            font-family: MusicTypography.body-family;
+                                            font-size: 18px;
+                                            wrap: word-wrap;
+                                            horizontal-alignment: left;
+                                        }
+
+                                        Text {
+                                            text: root.song-meta;
+                                            color: MusicPalette.text-muted;
+                                            font-family: MusicTypography.mono-family;
+                                            font-size: MusicTypography.meta-size;
+                                            wrap: word-wrap;
+                                            horizontal-alignment: left;
+                                        }
+
+                                        Rectangle {
+                                            background: MusicPalette.surface-1;
+                                            border-radius: 18px;
+
+                                            VerticalLayout {
+                                                padding: 16px;
+                                                spacing: 12px;
+                                                alignment: stretch;
+
+                                                HorizontalLayout {
+                                                    alignment: stretch;
+
+                                                    Text {
+                                                        text: root.elapsed-label;
+                                                        color: MusicPalette.text-secondary;
+                                                        font-family: MusicTypography.mono-family;
+                                                        font-size: MusicTypography.meta-size;
+                                                    }
+
+                                                    Rectangle {
+                                                        background: transparent;
+                                                        horizontal-stretch: 1;
+
+                                                        Text {
+                                                            width: parent.width;
+                                                            height: parent.height;
+                                                            text: root.duration-label;
+                                                            color: MusicPalette.text-secondary;
+                                                            font-family: MusicTypography.mono-family;
+                                                            font-size: MusicTypography.meta-size;
+                                                            horizontal-alignment: right;
+                                                            vertical-alignment: center;
+                                                        }
+                                                    }
+                                                }
+
+                                                MeterBar {
+                                                    value <=> root.progress;
+                                                    bar-height: 8px;
+                                                    changed(value) => { root.seek-requested(value); }
+                                                    released(value) => { root.seek-requested(value); }
+                                                }
+                                            }
+                                        }
+
+                                        HorizontalLayout {
+                                            spacing: 18px;
+                                            alignment: stretch;
+
+                                            HorizontalLayout {
+                                                spacing: 18px;
+
+                                                TransportButton {
+                                                    icon-source: MusicIcons.skip-back;
+                                                    width: 54px;
+                                                    height: 54px;
+                                                    clicked => { root.previous-track(); }
+                                                }
+
+                                                TransportButton {
+                                                    icon-source: root.playing ? MusicIcons.pause : MusicIcons.play;
+                                                    accent: true;
+                                                    large: true;
+                                                    width: 72px;
+                                                    height: 72px;
+                                                    clicked => { root.toggle-play(); }
+                                                }
+
+                                                TransportButton {
+                                                    icon-source: MusicIcons.skip-forward;
+                                                    width: 54px;
+                                                    height: 54px;
+                                                    clicked => { root.next-track(); }
+                                                }
+                                            }
+
+                                            Rectangle {
+                                                preferred-width: 194px;
+                                                preferred-height: 48px;
+                                                min-width: 194px;
+                                                max-width: 194px;
+                                                horizontal-stretch: 0;
+                                                background: MusicPalette.surface-1;
+                                                border-radius: 16px;
+
+                                                HorizontalLayout {
+                                                    padding: 14px;
+                                                    spacing: 12px;
+                                                    alignment: stretch;
+
+                                                    Image {
+                                                        width: 18px;
+                                                        height: 18px;
+                                                        source: root.volume-icon;
+                                                        colorize: MusicPalette.text-secondary;
+                                                        image-fit: contain;
+                                                        y: (parent.height - self.height) / 2;
+                                                    }
+
+                                                    MeterBar {
+                                                        value <=> root.volume;
+                                                        horizontal-stretch: 1;
+                                                        bar-height: 6px;
+                                                        changed(value) => { root.volume-requested(value); }
+                                                        released(value) => { root.volume-requested(value); }
+                                                    }
+
+                                                    Text {
+                                                        text: "" + round(root.volume * 100) + "%";
+                                                        color: MusicPalette.text-secondary;
+                                                        font-family: MusicTypography.mono-family;
+                                                        font-size: 11px;
+                                                        font-weight: FontWeight.medium;
+                                                        vertical-alignment: center;
+                                                        horizontal-alignment: right;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        lyrics-panel := Rectangle {
+                            background: MusicPalette.surface-0;
+                            border-radius: 24px;
+                            vertical-stretch: 1;
+
+                            VerticalLayout {
+                                padding: 24px;
+                                spacing: 18px;
+                                alignment: stretch;
+
+                                HorizontalLayout {
+                                    alignment: stretch;
+
+                                    VerticalLayout {
+                                        spacing: 6px;
+                                        horizontal-stretch: 1;
+
+                                        Text {
+                                            text: "Lyrics";
+                                            color: MusicPalette.text-primary;
+                                            font-family: MusicTypography.heading-family;
+                                            font-size: MusicTypography.section-size;
+                                            font-weight: FontWeight.bold;
+                                            horizontal-alignment: left;
+                                        }
+
+                                        Text {
+                                            text: root.lyrics-subtitle;
+                                            color: MusicPalette.text-secondary;
+                                            font-family: MusicTypography.body-family;
+                                            font-size: 14px;
+                                            wrap: word-wrap;
+                                            horizontal-alignment: left;
+                                        }
+                                    }
+
+                                    MusicChip {
+                                        label: "Synced";
+                                        active: false;
+                                        inactive-background: MusicPalette.surface-1;
+                                        inactive-foreground: MusicPalette.success;
+                                        clicked => { root.toggle-sync(); }
+                                    }
+                                }
+
+                                Rectangle {
+                                    background: MusicPalette.surface-1;
+                                    border-radius: 20px;
+                                    vertical-stretch: 1;
+
+                                    VerticalLayout {
+                                        padding: 24px;
+                                        spacing: 14px;
+                                        alignment: stretch;
+
+                                        for line[index] in root.lyric-model : LyricLine {
+                                            text: line.text;
+                                            active: line.active;
+                                            muted: line.muted;
+                                            clicked => { root.lyric-line-selected(index); }
+                                        }
+
+                                        Text {
+                                            text: root.next-lyric-hint;
+                                            color: MusicPalette.accent;
+                                            font-family: MusicTypography.mono-family;
+                                            font-size: MusicTypography.meta-size;
+                                            wrap: word-wrap;
+                                            horizontal-alignment: left;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                right-column := Rectangle {
+                    background: transparent;
+                    preferred-width: 452px;
+                    min-width: 360px;
+                    horizontal-stretch: 0;
+
+                    Rectangle {
+                        width: parent.width;
+                        height: parent.height;
+                        background: MusicPalette.surface-0;
+                        border-radius: 24px;
+
+                        VerticalLayout {
+                            padding: 24px;
+                            spacing: 18px;
+                            alignment: stretch;
+
+                            HorizontalLayout {
+                                alignment: stretch;
+
+                                VerticalLayout {
+                                    spacing: 6px;
+                                    horizontal-stretch: 1;
+
+                                    Text {
+                                        text: "Queue";
+                                        color: MusicPalette.text-primary;
+                                        font-family: MusicTypography.heading-family;
+                                        font-size: MusicTypography.section-size;
+                                        font-weight: FontWeight.bold;
+                                        horizontal-alignment: left;
+                                    }
+
+                                    Text {
+                                        text: root.queue-subtitle;
+                                        color: MusicPalette.text-secondary;
+                                        font-family: MusicTypography.body-family;
+                                        font-size: 14px;
+                                        wrap: word-wrap;
+                                        horizontal-alignment: left;
+                                    }
+                                }
+
+                                MusicChip {
+                                    label: root.queue-loaded-label;
+                                    active: false;
+                                    inactive-background: MusicPalette.surface-1;
+                                    inactive-foreground: MusicPalette.text-secondary;
+                                    enabled: false;
+                                }
+                            }
+
+                            Rectangle {
+                                background: MusicPalette.surface-1;
+                                border-radius: 18px;
+
+                                VerticalLayout {
+                                    padding: 16px;
+                                    spacing: 12px;
+                                    alignment: stretch;
+
+                                    Text {
+                                        text: "Playback mode";
+                                        color: MusicPalette.text-muted;
+                                        font-family: MusicTypography.mono-family;
+                                        font-size: MusicTypography.chip-size;
+                                        font-weight: FontWeight.medium;
+                                        horizontal-alignment: left;
+                                    }
+
+                                    HorizontalLayout {
+                                        spacing: 10px;
+                                        alignment: stretch;
+
+                                        for option[index] in root.playback-modes : MusicChip {
+                                            label: option.label;
+                                            show-icon: true;
+                                            icon-size: 13px;
+                                            icon-source: index == 0
+                                                ? MusicIcons.sequence
+                                                : (index == 1 ? MusicIcons.shuffle : MusicIcons.repeat-one);
+                                            active: option.active;
+                                            fill-width: true;
+                                            clicked => { root.playback-mode-selected(index); }
+                                        }
+                                    }
+                                }
+                            }
+
+                            HorizontalLayout {
+                                spacing: 12px;
+                                alignment: stretch;
+
+                                ActionCard {
+                                    horizontal-stretch: 1;
+                                    title: "Open file";
+                                    subtitle: "Import one song";
+                                    clicked => { root.open-file(); }
+                                }
+
+                                ActionCard {
+                                    horizontal-stretch: 1;
+                                    title: "Open folder";
+                                    subtitle: "Scan a whole directory";
+                                    clicked => { root.open-folder(); }
+                                }
+                            }
+
+                            Rectangle {
+                                background: transparent;
+                                vertical-stretch: 1;
+
+                                VerticalLayout {
+                                    spacing: 10px;
+                                    alignment: stretch;
+
+                                    for track[index] in root.queue-model : QueueItem {
+                                        order: track.order;
+                                        title: track.title;
+                                        artist: track.artist;
+                                        duration: track.duration;
+                                        active: track.active;
+                                        clicked => { root.queue-item-selected(index); }
+                                    }
+                                }
+                            }
+
+                            HorizontalLayout {
+                                alignment: stretch;
+
+                                MusicChip {
+                                    label: "Queue visible";
+                                    active: false;
+                                    inactive-background: transparent;
+                                    inactive-foreground: MusicPalette.accent;
+                                    clicked => { root.toggle-queue-visibility(); }
+                                }
+
+                                Text {
+                                    text: "Drag to reorder later";
+                                    color: MusicPalette.text-muted;
+                                    font-family: MusicTypography.body-family;
+                                    font-size: 12px;
+                                    horizontal-alignment: right;
+                                    vertical-alignment: center;
+                                    horizontal-stretch: 1;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

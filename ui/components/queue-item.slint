@@ -1,0 +1,72 @@
+import { FocusTouchArea } from "focus-touch-area.slint";
+import { MusicPalette, MusicTypography } from "theme.slint";
+
+export component QueueItem inherits Rectangle {
+    in property <string> order;
+    in property <string> title;
+    in property <string> artist;
+    in property <string> duration;
+    in property <bool> active: false;
+    callback clicked;
+
+    min-height: 72px;
+    border-radius: 18px;
+    background: root.active ? MusicPalette.surface-selected : MusicPalette.surface-1;
+    clip: true;
+    accessible-role: list-item;
+
+    touch := FocusTouchArea {
+        width: 100%;
+        height: 100%;
+        mouse-cursor: pointer;
+        clicked => { root.clicked(); }
+    }
+
+    HorizontalLayout {
+        padding: 14px;
+        spacing: 12px;
+        alignment: stretch;
+
+        Text {
+            min-width: 22px;
+            text: root.order;
+            color: root.active ? MusicPalette.accent : MusicPalette.text-muted;
+            font-family: MusicTypography.mono-family;
+            font-size: MusicTypography.meta-size;
+            vertical-alignment: center;
+            horizontal-alignment: center;
+        }
+
+        VerticalLayout {
+            spacing: 4px;
+            horizontal-stretch: 1;
+
+            Text {
+                text: root.title;
+                color: MusicPalette.text-primary;
+                font-family: MusicTypography.body-family;
+                font-size: MusicTypography.body-size;
+                font-weight: FontWeight.semi-bold;
+                horizontal-alignment: left;
+                wrap: word-wrap;
+            }
+
+            Text {
+                text: root.artist;
+                color: MusicPalette.text-secondary;
+                font-family: MusicTypography.body-family;
+                font-size: MusicTypography.meta-size;
+                horizontal-alignment: left;
+            }
+        }
+
+        Text {
+            text: root.duration;
+            color: MusicPalette.text-secondary;
+            font-family: MusicTypography.mono-family;
+            font-size: MusicTypography.meta-size;
+            vertical-alignment: center;
+            horizontal-alignment: right;
+        }
+    }
+}

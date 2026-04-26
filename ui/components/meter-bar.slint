@@ -1,0 +1,71 @@
+import { MusicPalette } from "theme.slint";
+
+export component MeterBar inherits Rectangle {
+    in-out property <float> value: 0.0;
+    in property <brush> track-color: MusicPalette.divider;
+    in property <brush> fill-color: MusicPalette.accent;
+    in property <brush> knob-color: MusicPalette.text-primary;
+    in property <length> bar-height: 8px;
+    in property <bool> show-knob: false;
+    callback changed(float);
+    callback released(float);
+
+    min-height: 24px;
+    min-width: 120px;
+    background: transparent;
+
+    private property <float> clamped-value: min(1, max(0, root.value));
+
+    track := Rectangle {
+        x: 0px;
+        y: (parent.height - root.bar-height) / 2;
+        width: parent.width;
+        height: root.bar-height;
+        border-radius: self.height / 2;
+        background: root.track-color;
+        clip: true;
+
+        Rectangle {
+            x: 0px;
+            y: 0px;
+            width: parent.width * root.clamped-value;
+            height: parent.height;
+            background: root.fill-color;
+            border-radius: parent.border-radius;
+        }
+    }
+
+    if root.show-knob : handle := Rectangle {
+        width: 12px;
+        height: 12px;
+        x: max(0px, min(root.width - self.width, root.clamped-value * root.width - self.width / 2));
+        y: (root.height - self.height) / 2;
+        border-radius: self.width / 2;
+        background: root.knob-color;
+    }
+
+    touch := TouchArea {
+        width: 100%;
+        height: 100%;
+        mouse-cursor: pointer;
+
+        private property <float> next-value: min(1, max(0, self.mouse-x / max(1px, self.width)));
+
+        pointer-event(event) => {
+            if event.button == PointerEventButton.left && event.kind == PointerEventKind.down {
+                root.value = self.next-value;
+                root.changed(root.value);
+            } else if event.button == PointerEventButton.left && event.kind == PointerEventKind.up {
+                root.value = self.next-value;
+                root.released(root.value);
+            }
+        }
+
+        moved => {
+            if self.pressed {
+                root.value = self.next-value;
+                root.changed(root.value);
+            }
+        }
+    }
+}

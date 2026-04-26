@@ -1,0 +1,49 @@
+import { FocusTouchArea } from "focus-touch-area.slint";
+import { MusicPalette, MusicTypography } from "theme.slint";
+
+export component LyricLine inherits Rectangle {
+    in property <string> text;
+    in property <bool> active: false;
+    in property <bool> muted: false;
+    callback clicked;
+
+    background: root.active ? MusicPalette.surface-selected : transparent;
+    border-radius: root.active ? 18px : 0px;
+    clip: true;
+
+    touch := FocusTouchArea {
+        width: 100%;
+        height: 100%;
+        mouse-cursor: pointer;
+        clicked => { root.clicked(); }
+    }
+
+    Text {
+        x: root.active ? 20px : 0px;
+        y: root.active ? 18px : 0px;
+        width: parent.width - (root.active ? 40px : 0px);
+        height: parent.height - (root.active ? 36px : 0px);
+        text: root.text;
+        color: root.active
+            ? MusicPalette.accent-soft
+            : (root.muted ? MusicPalette.text-muted : MusicPalette.text-secondary);
+        font-family: root.active ? MusicTypography.heading-family : MusicTypography.body-family;
+        font-size: root.active ? MusicTypography.lyric-focus-size : MusicTypography.lyric-size;
+        font-weight: root.active ? FontWeight.bold : FontWeight.normal;
+        wrap: word-wrap;
+        horizontal-alignment: left;
+        vertical-alignment: center;
+    }
+
+    min-height: root.active ? lyric-text.preferred-height + 36px : lyric-text.preferred-height;
+
+    lyric-text := Text {
+        visible: false;
+        width: parent.width - (root.active ? 40px : 0px);
+        text: root.text;
+        font-family: root.active ? MusicTypography.heading-family : MusicTypography.body-family;
+        font-size: root.active ? MusicTypography.lyric-focus-size : MusicTypography.lyric-size;
+        font-weight: root.active ? FontWeight.bold : FontWeight.normal;
+        wrap: word-wrap;
+    }
+}

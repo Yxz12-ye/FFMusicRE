@@ -1,0 +1,44 @@
+import { FocusTouchArea } from "focus-touch-area.slint";
+import { MusicPalette } from "theme.slint";
+
+export component TransportButton inherits Rectangle {
+    in property <image> icon-source;
+    in property <bool> accent: false;
+    in property <bool> large: false;
+    callback clicked;
+
+    preferred-width: root.large ? 72px : 54px;
+    preferred-height: root.large ? 72px : 54px;
+    min-width: self.preferred-width;
+    min-height: self.preferred-height;
+    max-width: self.preferred-width;
+    max-height: self.preferred-height;
+    horizontal-stretch: 0;
+    vertical-stretch: 0;
+    border-radius: self.width / 2;
+    background: root.accent
+        ? (touch.pressed ? MusicPalette.accent.darker(15%) : MusicPalette.accent)
+        : (touch.pressed ? MusicPalette.surface-1.darker(8%) : MusicPalette.surface-1);
+    border-width: root.accent ? 1px : 0px;
+    border-color: root.accent ? MusicPalette.divider : transparent;
+    clip: true;
+    accessible-role: button;
+    accessible-action-default => { touch.clicked(); }
+
+    touch := FocusTouchArea {
+        width: 100%;
+        height: 100%;
+        mouse-cursor: pointer;
+        clicked => { root.clicked(); }
+    }
+
+    Image {
+        width: root.large ? 28px : 22px;
+        height: root.large ? 28px : 22px;
+        x: (parent.width - self.width) / 2;
+        y: (parent.height - self.height) / 2;
+        source: root.icon-source;
+        colorize: root.accent ? MusicPalette.shell : MusicPalette.text-primary;
+        image-fit: contain;
+    }
+}
