@@ -38,6 +38,9 @@ add_executable(${PROJECT_NAME} ${PROJECT_SOURCE})
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_compile_definitions(${PROJECT_NAME} PRIVATE TAGLIB_STATIC)
 
+set(SLINT_FEATURE_RENDERER_FEMTOVG OFF CACHE BOOL "Disable FemtoVG renderer for FFMusicRE" FORCE)
+set(SLINT_FEATURE_RENDERER_SOFTWARE ON CACHE BOOL "Enable software renderer for FFMusicRE" FORCE)
+
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/slint/api/cpp/CMakeLists.txt")
     add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/slint/api/cpp" slint_cpp_build)
 endif()
@@ -62,4 +65,3 @@ if(WIN32)
         COMMAND_EXPAND_LISTS
     )
 endif()
-
