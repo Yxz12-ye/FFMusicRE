@@ -170,12 +170,13 @@ export component AppWindow inherits Window {
                                 }
 
                                 control-card := Rectangle {
-                                    horizontal-stretch: 1;
+                                    min-width: 476px;
+                                    horizontal-stretch: 0;
                                     background: MusicPalette.surface-0;
                                     border-radius: 24px;
 
                                     VerticalLayout {
-                                        padding: 24px;
+                                        padding: 20px;
                                         spacing: 18px;
                                         alignment: stretch;
 
@@ -193,38 +194,49 @@ export component AppWindow inherits Window {
                                                 color: MusicPalette.text-muted;
                                                 font-family: MusicTypography.mono-family;
                                                 font-size: MusicTypography.meta-size;
+                                                min-width: 0px;
                                                 horizontal-alignment: right;
                                                 vertical-alignment: center;
                                                 horizontal-stretch: 1;
+                                                wrap: no-wrap;
+                                                overflow: elide;
                                             }
                                         }
 
                                         Text {
                                             text: root.song-title;
+                                            min-width: 0px;
                                             color: MusicPalette.text-primary;
                                             font-family: MusicTypography.heading-family;
                                             font-size: MusicTypography.title-size;
                                             font-weight: FontWeight.bold;
-                                            wrap: word-wrap;
+                                            horizontal-stretch: 1;
+                                            wrap: no-wrap;
+                                            overflow: elide;
                                             horizontal-alignment: left;
-                                            
                                         }
 
                                         Text {
                                             text: root.song-artist;
+                                            min-width: 0px;
                                             color: MusicPalette.text-secondary;
                                             font-family: MusicTypography.body-family;
                                             font-size: 18px;
-                                            wrap: word-wrap;
+                                            horizontal-stretch: 1;
+                                            wrap: no-wrap;
+                                            overflow: elide;
                                             horizontal-alignment: left;
                                         }
 
                                         Text {
                                             text: root.song-meta;
+                                            min-width: 0px;
                                             color: MusicPalette.text-muted;
                                             font-family: MusicTypography.mono-family;
                                             font-size: MusicTypography.meta-size;
-                                            wrap: word-wrap;
+                                            horizontal-stretch: 1;
+                                            wrap: no-wrap;
+                                            overflow: elide;
                                             horizontal-alignment: left;
                                         }
 
@@ -274,57 +286,52 @@ export component AppWindow inherits Window {
                                         }
 
                                         HorizontalLayout {
-                                            spacing: 18px;
+                                            spacing: 10px;
+                                            preferred-height: 54px;
+                                            min-height: 54px;
+                                            max-height: 54px;
                                             alignment: stretch;
 
-                                            HorizontalLayout {
-                                                spacing: 18px;
+                                            TransportButton {
+                                                icon-source: MusicIcons.skip-back;
+                                                clicked => { root.previous-track(); }
+                                            }
 
-                                                TransportButton {
-                                                    icon-source: MusicIcons.skip-back;
-                                                    width: 54px;
-                                                    height: 54px;
-                                                    clicked => { root.previous-track(); }
-                                                }
+                                            TransportButton {
+                                                icon-source: root.playing ? MusicIcons.pause : MusicIcons.play;
+                                                accent: true;
+                                                clicked => { root.toggle-play(); }
+                                            }
 
-                                                TransportButton {
-                                                    icon-source: root.playing ? MusicIcons.pause : MusicIcons.play;
-                                                    accent: true;
-                                                    large: true;
-                                                    width: 72px;
-                                                    height: 72px;
-                                                    clicked => { root.toggle-play(); }
-                                                }
-
-                                                TransportButton {
-                                                    icon-source: MusicIcons.skip-forward;
-                                                    width: 54px;
-                                                    height: 54px;
-                                                    clicked => { root.next-track(); }
-                                                }
+                                            TransportButton {
+                                                icon-source: MusicIcons.skip-forward;
+                                                clicked => { root.next-track(); }
                                             }
 
                                             Rectangle {
-                                                preferred-width: 194px;
-                                                preferred-height: 48px;
                                                 min-width: 194px;
-                                                max-width: 194px;
-                                                horizontal-stretch: 0;
                                                 background: MusicPalette.surface-1;
                                                 border-radius: 16px;
+                                                clip: true;
 
                                                 HorizontalLayout {
-                                                    padding: 14px;
-                                                    spacing: 12px;
+                                                    padding: 10px;
+                                                    spacing: 8px;
                                                     alignment: stretch;
 
-                                                    Image {
+                                                    Rectangle {
                                                         width: 18px;
-                                                        height: 18px;
-                                                        source: root.volume-icon;
-                                                        colorize: MusicPalette.text-secondary;
-                                                        image-fit: contain;
-                                                        y: (parent.height - self.height) / 2;
+                                                        background: transparent;
+
+                                                        Image {
+                                                            width: 16px;
+                                                            height: 16px;
+                                                            x: (parent.width - self.width) / 2;
+                                                            y: (parent.height - self.height) / 2;
+                                                            source: root.volume-icon;
+                                                            colorize: MusicPalette.text-secondary;
+                                                            image-fit: contain;
+                                                        }
                                                     }
 
                                                     MeterBar {
@@ -335,14 +342,21 @@ export component AppWindow inherits Window {
                                                         released(value) => { root.volume-requested(value); }
                                                     }
 
-                                                    Text {
-                                                        text: "" + round(root.volume * 100) + "%";
-                                                        color: MusicPalette.text-secondary;
-                                                        font-family: MusicTypography.mono-family;
-                                                        font-size: 11px;
-                                                        font-weight: FontWeight.medium;
-                                                        vertical-alignment: center;
-                                                        horizontal-alignment: right;
+                                                    Rectangle {
+                                                        width: 30px;
+                                                        background: transparent;
+
+                                                        Text {
+                                                            width: parent.width;
+                                                            height: parent.height;
+                                                            text: "" + round(root.volume * 100) + "%";
+                                                            color: MusicPalette.text-secondary;
+                                                            font-family: MusicTypography.mono-family;
+                                                            font-size: 10px;
+                                                            font-weight: FontWeight.medium;
+                                                            vertical-alignment: center;
+                                                            horizontal-alignment: right;
+                                                        }
                                                     }
                                                 }
                                             }
@@ -391,6 +405,9 @@ export component AppWindow inherits Window {
                                     MusicChip {
                                         label: "Synced";
                                         active: false;
+                                        min-height: 32px;
+                                        max-height: 32px;
+                                        border-radius: 30px;
                                         inactive-background: MusicPalette.surface-1;
                                         inactive-foreground: MusicPalette.success;
                                         clicked => { root.toggle-sync(); }
