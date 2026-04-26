@@ -1,6 +1,7 @@
 #pragma once
 
 #include "audio_player.h"
+#include "lrc.h"
 #include "track.h"
 
 #include "app-window.h"
@@ -47,7 +48,9 @@ private:
     auto rebuild_queue_model() -> void;
     auto rebuild_playback_mode_model() -> void;
     auto rebuild_cover_tags() -> void;
-    auto rebuild_lyrics_placeholder() -> void;
+    auto load_lyrics_for_current_track() -> void;
+    auto rebuild_lyric_model() -> void;
+    auto sync_lyrics_to_position() -> void;
     auto refresh_now_playing() -> void;
     auto refresh_transport_state() -> void;
     auto refresh_queue_labels() -> void;
@@ -62,6 +65,8 @@ private:
     PlaybackMode playback_mode_ = PlaybackMode::Sequence;
     bool queue_visible_ = true;
     bool sync_enabled_ = false;
+    LrcDocument lyrics_;
+    int active_lyric_index_ = -1;
     AudioPlayer player_;
     AudioPlayer::Status last_status_ = AudioPlayer::Status::Stopped;
     slint::Timer ui_timer_;

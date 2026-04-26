@@ -27,6 +27,7 @@ public:
     auto pause() -> void;
     auto toggle() -> void;
     auto seek_to_ratio(float ratio) -> void;
+    auto seek_to_seconds(float seconds) -> void;
     auto set_volume(float normalized_volume) -> void;
     auto volume() const -> float;
     auto set_looping(bool looping) -> void;

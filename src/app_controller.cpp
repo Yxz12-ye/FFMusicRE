@@ -1,5 +1,6 @@
 #include "app_controller.h"
 
+#include "lrc.h"
 #include "platform_dialogs.h"
 
 #include <algorithm>
@@ -77,9 +78,9 @@ auto describe_source(const std::filesystem::path &path, std::size_t count) -> st
 auto placeholder_lyrics(const Track *track) -> std::vector<LyricLineData>
 {
     std::vector<LyricLineData> lyrics;
-    lyrics.push_back(LyricLineData { to_shared("Lyrics import is not implemented yet."), true, false });
+    lyrics.push_back(LyricLineData { to_shared("No synced LRC lyric found for the current track."), true, false });
     lyrics.push_back(LyricLineData {
-        to_shared("Playback, queue, metadata, volume, and seeking are live now."),
+        to_shared("Place a same-name .lrc file next to the audio file to enable sync."),
         false,
         false,
     });
@@ -120,7 +121,15 @@ auto AppController::bind_callbacks() -> void
     window_->on_playback_mode_selected([this](int index) { on_playback_mode_selected(index); });
     window_->on_toggle_queue_visibility([this] { on_toggle_queue_visibility_requested(); });
     window_->on_toggle_sync([this] { on_toggle_sync_requested(); });
-    window_->on_lyric_line_selected([](int) {});
+    window_->on_lyric_line_selected([this](int index) {
+        if (index < 0 || static_cast<std::size_t>(index) >= lyrics_.lines.size()) {
+            return;
+        }
+
+        player_.seek_to_seconds(static_cast<float>(lyrics_.lines[static_cast<std::size_t>(index)].time_ms) / 1000.0f);
+        sync_lyrics_to_position();
+        refresh_transport_state();
+    });
 }
 
 auto AppController::start_ui_timer() -> void
@@ -158,7 +167,7 @@ auto AppController::load_queue_from_paths(
     rebuild_queue_model();
     refresh_queue_labels();
     rebuild_cover_tags();
-    rebuild_lyrics_placeholder();
+    load_lyrics_for_current_track();
 
     if (!open_next_playable_from(0, true)) {
         clear_queue("The selected audio files could not be opened by the playback engine.");
@@ -172,6 +181,8 @@ auto AppController::clear_queue(const std::string &message) -> void
     current_source_.clear();
     source_description_.clear();
     current_index_ = 0;
+    lyrics_ = {};
+    active_lyric_index_ = -1;
     player_.set_looping(playback_mode_ == PlaybackMode::RepeatOne);
     last_status_ = AudioPlayer::Status::Stopped;
 
@@ -181,6 +192,8 @@ auto AppController::clear_queue(const std::string &message) -> void
         TagData { to_shared("0 loaded"), false },
     }));
     window_->set_lyric_model(std::make_shared<slint::VectorModel<LyricLineData>>(placeholder_lyrics(nullptr)));
+    window_->set_lyrics_subtitle(to_shared("Centered on the current phrase for low-distraction reading."));
+    window_->set_next_lyric_hint(to_shared("Next: Load music"));
     window_->set_song_title(to_shared("No track loaded"));
     window_->set_song_artist(to_shared("Import audio to begin"));
     window_->set_song_meta(to_shared("SFML playback core  ·  TagLib metadata"));
@@ -210,7 +223,7 @@ auto AppController::open_track_at(std::size_t index, bool autoplay) -> bool
     refresh_now_playing();
     rebuild_queue_model();
     rebuild_cover_tags();
-    rebuild_lyrics_placeholder();
+    load_lyrics_for_current_track();
     refresh_transport_state();
     return true;
 }
@@ -318,6 +331,7 @@ auto AppController::on_queue_item_selected(int index) -> void
 auto AppController::on_seek_requested(float value) -> void
 {
     player_.seek_to_ratio(value);
+    sync_lyrics_to_position();
     refresh_transport_state();
 }
 
@@ -347,7 +361,7 @@ auto AppController::on_toggle_queue_visibility_requested() -> void
 auto AppController::on_toggle_sync_requested() -> void
 {
     sync_enabled_ = !sync_enabled_;
-    rebuild_lyrics_placeholder();
+    rebuild_lyric_model();
 }
 
 auto AppController::on_ui_tick() -> void
@@ -361,6 +375,7 @@ auto AppController::on_ui_tick() -> void
         current_status = player_.status();
     }
 
+    sync_lyrics_to_position();
     refresh_transport_state();
     last_status_ = current_status;
 }
@@ -485,21 +500,113 @@ auto AppController::rebuild_cover_tags() -> void
     window_->set_cover_tags(std::make_shared<slint::VectorModel<TagData>>(items));
 }
 
-auto AppController::rebuild_lyrics_placeholder() -> void
+auto AppController::load_lyrics_for_current_track() -> void
+{
+    lyrics_ = {};
+    active_lyric_index_ = -1;
+
+    const auto *track = current_track();
+    if (track == nullptr) {
+        rebuild_lyric_model();
+        return;
+    }
+
+    const auto lrc_path = find_lrc_for_track(track->path);
+    if (lrc_path.has_value()) {
+        if (const auto loaded = load_lrc_file(*lrc_path)) {
+            lyrics_ = *loaded;
+        }
+    }
+
+    rebuild_lyric_model();
+}
+
+auto AppController::rebuild_lyric_model() -> void
 {
     const auto *track = current_track();
-    window_->set_lyric_model(
-        std::make_shared<slint::VectorModel<LyricLineData>>(placeholder_lyrics(track)));
 
-    const std::string subtitle = sync_enabled_
-        ? "Sync toggle is on, but lyric parsing is not wired yet."
-        : "Playback is active; lyric parsing can be added on top of this core.";
+    if (lyrics_.empty()) {
+        window_->set_lyric_model(
+            std::make_shared<slint::VectorModel<LyricLineData>>(placeholder_lyrics(track)));
+
+        const std::string subtitle = sync_enabled_
+            ? "Sync toggle is on. Waiting for a same-name .lrc file."
+            : "LRC support is enabled. Add a same-name .lrc file for synced lyrics.";
+        window_->set_lyrics_subtitle(to_shared(subtitle));
+
+        const std::string next_hint = track == nullptr
+            ? "Next: Load music"
+            : "Next: " + utf8_from_path(track->path.stem()) + ".lrc";
+        window_->set_next_lyric_hint(to_shared(next_hint));
+        return;
+    }
+
+    std::vector<LyricLineData> items;
+    items.reserve(lyrics_.lines.size());
+
+    for (std::size_t index = 0; index < lyrics_.lines.size(); ++index) {
+        const bool active = static_cast<int>(index) == active_lyric_index_;
+        const bool muted = active_lyric_index_ >= 0
+            && static_cast<int>(index) < active_lyric_index_ - 1;
+
+        items.push_back(LyricLineData {
+            to_shared(lyrics_.lines[index].text),
+            active,
+            muted,
+        });
+    }
+
+    window_->set_lyric_model(std::make_shared<slint::VectorModel<LyricLineData>>(items));
+
+    std::string subtitle = "Synced LRC";
+    if (!lyrics_.title.empty() || !lyrics_.artist.empty()) {
+        subtitle += " · ";
+        if (!lyrics_.title.empty()) {
+            subtitle += lyrics_.title;
+        }
+        if (!lyrics_.artist.empty()) {
+            if (!lyrics_.title.empty()) {
+                subtitle += " / ";
+            }
+            subtitle += lyrics_.artist;
+        }
+    }
+    subtitle += " · " + std::to_string(lyrics_.lines.size()) + " lines";
     window_->set_lyrics_subtitle(to_shared(subtitle));
 
-    const std::string next_hint = track == nullptr
-        ? "Next: Load music"
-        : "Next: " + utf8_from_path(track->path.filename());
-    window_->set_next_lyric_hint(to_shared(next_hint));
+    if (active_lyric_index_ >= 0
+        && static_cast<std::size_t>(active_lyric_index_ + 1) < lyrics_.lines.size()) {
+        window_->set_next_lyric_hint(
+            to_shared("Next: " + lyrics_.lines[static_cast<std::size_t>(active_lyric_index_ + 1)].text));
+    } else if (!lyrics_.lines.empty()) {
+        window_->set_next_lyric_hint(to_shared("Next: " + lyrics_.lines.front().text));
+    } else {
+        window_->set_next_lyric_hint(to_shared("Next: ..."));
+    }
+}
+
+auto AppController::sync_lyrics_to_position() -> void
+{
+    if (lyrics_.empty()) {
+        return;
+    }
+
+    const int position_ms = static_cast<int>(player_.position_seconds() * 1000.0f);
+    int new_active_index = -1;
+
+    for (std::size_t index = 0; index < lyrics_.lines.size(); ++index) {
+        if (lyrics_.lines[index].time_ms > position_ms) {
+            break;
+        }
+        new_active_index = static_cast<int>(index);
+    }
+
+    if (new_active_index == active_lyric_index_) {
+        return;
+    }
+
+    active_lyric_index_ = new_active_index;
+    rebuild_lyric_model();
 }
 
 auto AppController::refresh_now_playing() -> void

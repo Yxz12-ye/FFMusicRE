@@ -264,6 +264,19 @@ auto AudioPlayer::seek_to_ratio(float ratio) -> void
     });
 }
 
+auto AudioPlayer::seek_to_seconds(float seconds) -> void
+{
+    impl_->invoke_sync([seconds](Impl::WorkerState &state) {
+        if (!state.has_track) {
+            return;
+        }
+
+        const auto duration = state.music.getDuration().asSeconds();
+        const auto clamped = std::clamp(seconds, 0.0f, duration);
+        state.music.setPlayingOffset(sf::seconds(clamped));
+    });
+}
+
 auto AudioPlayer::set_volume(float normalized_volume) -> void
 {
     impl_->invoke_sync([normalized_volume](Impl::WorkerState &state) {
