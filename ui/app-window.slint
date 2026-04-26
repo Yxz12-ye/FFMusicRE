@@ -418,17 +418,29 @@ export component AppWindow inherits Window {
                                     background: MusicPalette.surface-1;
                                     border-radius: 20px;
                                     vertical-stretch: 1;
+                                    clip: true;
 
                                     VerticalLayout {
                                         padding: 24px;
                                         spacing: 14px;
                                         alignment: stretch;
 
-                                        for line[index] in root.lyric-model : LyricLine {
-                                            text: line.text;
-                                            active: line.active;
-                                            muted: line.muted;
-                                            clicked => { root.lyric-line-selected(index); }
+                                        Flickable {
+                                            vertical-stretch: 1;
+                                            // clip: true;
+
+                                            VerticalLayout {
+                                                width: parent.width;
+                                                spacing: 14px;
+                                                alignment: start;
+
+                                                for line[index] in root.lyric-model : LyricLine {
+                                                    text: line.text;
+                                                    active: line.active;
+                                                    muted: line.muted;
+                                                    clicked => { root.lyric-line-selected(index); }
+                                                }
+                                            }
                                         }
 
                                         Text {
