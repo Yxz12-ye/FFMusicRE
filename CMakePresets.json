@@ -1,0 +1,274 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 16,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "installDir": "${sourceDir}/out/install/${presetName}",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
+        },
+        {
+            "name": "debug",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "release",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "vcpkg",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_USE_VCPKG": "ON"
+            }
+        },
+        {
+            "name": "ninja-clang",
+            "hidden": true,
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_COMPILER": "clang++"
+            }
+        },
+        {
+            "name": "ninja-clang-cl",
+            "hidden": true,
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang-cl",
+                "CMAKE_CXX_COMPILER": "clang-cl"
+            }
+        },
+        {
+            "name": "ninja-gcc",
+            "hidden": true,
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_COMPILER": "g++"
+            }
+        },
+        {
+            "name": "msvc-vs",
+            "hidden": true,
+            "generator": "Visual Studio 17 2022",
+            "architecture": "x64"
+        },
+        {
+            "name": "msvc-ninja",
+            "hidden": true,
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "cl.exe",
+                "CMAKE_CXX_COMPILER": "cl.exe"
+            }
+        },
+        {
+            "name": "win-clang-debug",
+            "displayName": "Windows Clang Debug",
+            "inherits": [
+                "base",
+                "ninja-clang",
+                "debug"
+            ]
+        },
+        {
+            "name": "win-clang-release",
+            "displayName": "Windows Clang Release",
+            "inherits": [
+                "base",
+                "ninja-clang",
+                "release"
+            ]
+        },
+        {
+            "name": "win-clang-cl-debug",
+            "displayName": "Windows Clang-CL Debug (Ninja)",
+            "inherits": [
+                "base",
+                "ninja-clang-cl",
+                "debug"
+            ]
+        },
+        {
+            "name": "win-clang-cl-release",
+            "displayName": "Windows Clang-CL Release (Ninja)",
+            "inherits": [
+                "base",
+                "ninja-clang-cl",
+                "release"
+            ]
+        },
+        {
+            "name": "win-msvc-vs-debug",
+            "displayName": "Windows MSVC Debug (VS Generator)",
+            "inherits": [
+                "base",
+                "msvc-vs",
+                "debug"
+            ]
+        },
+        {
+            "name": "win-msvc-vs-release",
+            "displayName": "Windows MSVC Release (VS Generator)",
+            "inherits": [
+                "base",
+                "msvc-vs",
+                "release"
+            ]
+        },
+        {
+            "name": "win-msvc-ninja-debug",
+            "displayName": "Windows MSVC Debug (Ninja)",
+            "inherits": [
+                "base",
+                "msvc-ninja",
+                "debug"
+            ]
+        },
+        {
+            "name": "win-msvc-ninja-release",
+            "displayName": "Windows MSVC Release (Ninja)",
+            "inherits": [
+                "base",
+                "msvc-ninja",
+                "release"
+            ]
+        },
+        {
+            "name": "linux-gcc-debug",
+            "displayName": "Linux GCC Debug",
+            "inherits": [
+                "base",
+                "ninja-gcc",
+                "debug"
+            ],
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
+            "name": "linux-gcc-release",
+            "displayName": "Linux GCC Release",
+            "inherits": [
+                "base",
+                "ninja-gcc",
+                "release"
+            ],
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
+            "name": "linux-clang-debug",
+            "displayName": "Linux Clang Debug",
+            "inherits": [
+                "base",
+                "ninja-clang",
+                "debug"
+            ],
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
+            "name": "macos-clang-debug",
+            "displayName": "macOS Clang Debug",
+            "inherits": [
+                "base",
+                "ninja-clang",
+                "debug"
+            ],
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Darwin"
+            }
+        },
+        {
+            "name": "macos-clang-release",
+            "displayName": "macOS Clang Release",
+            "inherits": [
+                "base",
+                "ninja-clang",
+                "release"
+            ],
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Darwin"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "win-clang-debug",
+            "configurePreset": "win-clang-debug"
+        },
+        {
+            "name": "win-clang-release",
+            "configurePreset": "win-clang-release"
+        },
+        {
+            "name": "win-clang-cl-debug",
+            "configurePreset": "win-clang-cl-debug"
+        },
+        {
+            "name": "win-clang-cl-release",
+            "configurePreset": "win-clang-cl-release"
+        },
+        {
+            "name": "win-msvc-vs-debug",
+            "configurePreset": "win-msvc-vs-debug"
+        },
+        {
+            "name": "win-msvc-vs-release",
+            "configurePreset": "win-msvc-vs-release"
+        },
+        {
+            "name": "win-msvc-ninja-debug",
+            "configurePreset": "win-msvc-ninja-debug"
+        },
+        {
+            "name": "win-msvc-ninja-release",
+            "configurePreset": "win-msvc-ninja-release"
+        },
+        {
+            "name": "linux-gcc-debug",
+            "configurePreset": "linux-gcc-debug"
+        },
+        {
+            "name": "linux-gcc-release",
+            "configurePreset": "linux-gcc-release"
+        },
+        {
+            "name": "macos-clang-debug",
+            "configurePreset": "macos-clang-debug"
+        },
+        {
+            "name": "macos-clang-release",
+            "configurePreset": "macos-clang-release"
+        }
+    ]
+}
