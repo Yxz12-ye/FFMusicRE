@@ -201,16 +201,16 @@ auto load_embedded_cover_image(const std::filesystem::path &path) -> std::option
 auto placeholder_lyrics(const Track *track) -> std::vector<LyricLineData>
 {
     std::vector<LyricLineData> lyrics;
-    lyrics.push_back(LyricLineData { to_shared("No synced LRC lyric found for the current track."), true, false });
+    lyrics.push_back(LyricLineData { to_shared("未找到歌词"), true, false });
     lyrics.push_back(LyricLineData {
-        to_shared("Place a same-name .lrc file next to the audio file to enable sync."),
+        to_shared("如果有歌词, 保持和音乐同名且在同一目录以自动读取"),
         false,
         false,
     });
 
     const std::string tail = track == nullptr
-        ? "Open a file or folder to start."
-        : "Current file: " + utf8_from_path(track->path.filename());
+        ? "打开一个文件或文件夹以播放"
+        : "当前文件: " + utf8_from_path(track->path.filename());
     lyrics.push_back(LyricLineData { to_shared(tail), false, true });
     return lyrics;
 }
@@ -317,10 +317,10 @@ auto AppController::clear_queue(const std::string &message) -> void
     window_->set_lyric_model(std::make_shared<slint::VectorModel<LyricLineData>>(placeholder_lyrics(nullptr)));
     window_->set_lyrics_subtitle(to_shared("Centered on the current phrase for low-distraction reading."));
     window_->set_next_lyric_hint(to_shared("Next: Load music"));
-    window_->set_song_title(to_shared("No track loaded"));
-    window_->set_song_artist(to_shared("Import audio to begin"));
+    window_->set_song_title(to_shared("当前没有打开的文件"));
+    window_->set_song_artist(to_shared("打开文件以开始播放"));
     // window_->set_song_meta(to_shared("SFML playback core  ·  TagLib metadata"));
-    window_->set_format_label(to_shared("No file"));
+    window_->set_format_label(to_shared("当前无文件"));
     window_->set_cover_image(slint::Image());
     // window_->set_collection_note(to_shared(message));
     window_->set_elapsed_label(to_shared("00:00"));

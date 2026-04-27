@@ -26,7 +26,7 @@ export component AppWindow inherits Window {
     in-out property <string> duration-label: "04:12";
     in-out property <string> lyrics-subtitle: "Centered on the current phrase for low-distraction reading.";
     in-out property <string> next-lyric-hint: "Next: We stay until the morning bends";
-    in-out property <string> queue-subtitle: "Playback order, import actions, and the upcoming tracks.";
+    in-out property <string> queue-subtitle: "咕咕嘎嘎!";
     in-out property <string> queue-loaded-label: "05 loaded";
     in-out property <float> progress: 0.295;
     in-out property <float> volume: 0.68;
@@ -34,9 +34,9 @@ export component AppWindow inherits Window {
     in-out property <bool> queue-visible: true;
     in-out property <image> cover-image;
     in-out property <[ModeOption]> playback-modes: [
-        { label: "Sequence", active: true },
-        { label: "Shuffle", active: false },
-        { label: "Repeat one", active: false },
+        { label: "顺序播放", active: true },
+        { label: "随机播放", active: false },
+        { label: "循环播放", active: false },
     ];
     in-out property <[QueueTrack]> queue-model: [
         { order: "01", title: "After Rain Comes Color", artist: "Mira Hoshino", duration: "04:12", active: true },
@@ -488,7 +488,7 @@ export component AppWindow inherits Window {
                                     horizontal-stretch: 1;
 
                                     Text {
-                                        text: "Queue";
+                                        text: "播放列表";
                                         color: MusicPalette.text-primary;
                                         font-family: MusicTypography.heading-family;
                                         font-size: MusicTypography.section-size;
@@ -526,7 +526,7 @@ export component AppWindow inherits Window {
                                     alignment: stretch;
 
                                     Text {
-                                        text: "Playback mode";
+                                        text: "Play Mode";
                                         color: MusicPalette.text-muted;
                                         font-family: MusicTypography.mono-family;
                                         font-size: MusicTypography.chip-size;
@@ -560,15 +560,15 @@ export component AppWindow inherits Window {
 
                                 ActionCard {
                                     horizontal-stretch: 1;
-                                    title: "Open file";
-                                    subtitle: "Import one song";
+                                    title: "打开文件";
+                                    subtitle: "导入一首歌";
                                     clicked => { root.open-file(); }
                                 }
 
                                 ActionCard {
                                     horizontal-stretch: 1;
-                                    title: "Open folder";
-                                    subtitle: "Scan a whole directory";
+                                    title: "打开文件加";
+                                    subtitle: "搜索文件夹内音乐";
                                     clicked => { root.open-folder(); }
                                 }
                             }
