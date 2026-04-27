@@ -13,12 +13,24 @@
 #include <cctype>
 #include <chrono>
 #include <cstddef>
+#include <fstream>
 #include <iomanip>
 #include <limits>
 #include <optional>
 #include <sstream>
+#include <string_view>
+#include <system_error>
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 namespace {
+
+struct SessionState {
+    float volume = 0.68f;
+    std::vector<std::filesystem::path> queue_paths;
+};
 
 auto to_shared(const std::string &value) -> slint::SharedString
 {
@@ -88,6 +100,98 @@ auto describe_append_source(const std::filesystem::path &path, std::size_t count
     const auto name = path.empty() ? std::string("selection") : utf8_from_path(path.filename());
     const auto track_word = count == 1 ? "track" : "tracks";
     return "Added " + std::to_string(count) + " " + track_word + " from " + name + ".";
+}
+
+auto describe_restore_source(std::size_t count) -> std::string
+{
+    const auto track_word = count == 1 ? "track" : "tracks";
+    return "Restored " + std::to_string(count) + " " + track_word + " from the last session.";
+}
+
+auto path_from_utf8_string(const std::string &value) -> std::filesystem::path
+{
+    return std::filesystem::u8path(value);
+}
+
+auto local_app_data_directory() -> std::filesystem::path
+{
+#ifdef _WIN32
+    std::wstring buffer(MAX_PATH, L'\0');
+    const DWORD length = GetEnvironmentVariableW(L"LOCALAPPDATA", buffer.data(), MAX_PATH);
+    if (length == 0 || length >= MAX_PATH) {
+        return {};
+    }
+
+    buffer.resize(length);
+    return std::filesystem::path(buffer);
+#else
+    return std::filesystem::temp_directory_path();
+#endif
+}
+
+auto session_state_path() -> std::filesystem::path
+{
+    const auto base = local_app_data_directory();
+    return base.empty() ? std::filesystem::path {} : base / "FFMusicRE" / "history.txt";
+}
+
+auto load_session_state_from_disk() -> SessionState
+{
+    SessionState state;
+    const auto path = session_state_path();
+    if (path.empty()) {
+        return state;
+    }
+
+    std::ifstream input(path, std::ios::binary);
+    if (!input) {
+        return state;
+    }
+
+    std::string line;
+    while (std::getline(input, line)) {
+        if (line.starts_with("volume=")) {
+            try {
+                state.volume = std::stof(line.substr(std::string_view("volume=").size()));
+            } catch (...) {
+                state.volume = 0.68f;
+            }
+            continue;
+        }
+
+        if (line.starts_with("track=")) {
+            const auto raw_path = line.substr(std::string_view("track=").size());
+            if (!raw_path.empty()) {
+                state.queue_paths.push_back(path_from_utf8_string(raw_path));
+            }
+        }
+    }
+
+    return state;
+}
+
+auto save_session_state_to_disk(float volume, const std::vector<Track> &queue) -> void
+{
+    const auto path = session_state_path();
+    if (path.empty()) {
+        return;
+    }
+
+    std::error_code error;
+    std::filesystem::create_directories(path.parent_path(), error);
+    if (error) {
+        return;
+    }
+
+    std::ofstream output(path, std::ios::binary | std::ios::trunc);
+    if (!output) {
+        return;
+    }
+
+    output << std::fixed << std::setprecision(4) << "volume=" << volume << '\n';
+    for (const auto &track : queue) {
+        output << "track=" << utf8_from_path(track.path) << '\n';
+    }
 }
 
 auto read_taglib_string(const TagLib::String &value) -> std::string
@@ -236,6 +340,7 @@ auto AppController::initialize() -> void
     rebuild_playback_mode_model();
     clear_queue("Choose a file or folder to start playback.");
     window_->set_volume(player_.volume());
+    load_session_state();
     start_ui_timer();
 }
 
@@ -264,6 +369,10 @@ auto AppController::bind_callbacks() -> void
         player_.seek_to_seconds(static_cast<float>(lyrics_.lines[static_cast<std::size_t>(index)].time_ms) / 1000.0f);
         sync_lyrics_to_position();
         refresh_transport_state();
+    });
+    window_->window().on_close_requested([this] {
+        save_session_state();
+        return slint::CloseRequestResponse::HideWindow;
     });
 }
 
@@ -310,7 +419,9 @@ auto AppController::load_queue_from_paths(
 }
 
 auto AppController::append_queue_from_paths(
-    const std::vector<std::filesystem::path> &paths, const std::string &source_description) -> void
+    const std::vector<std::filesystem::path> &paths,
+    const std::string &source_description,
+    bool autoplay_if_queue_was_empty) -> void
 {
     std::vector<Track> appended_tracks;
     appended_tracks.reserve(paths.size());
@@ -343,7 +454,7 @@ auto AppController::append_queue_from_paths(
 
     if (queue_was_empty) {
         load_lyrics_for_current_track();
-        if (!open_next_playable_from(0, true)) {
+        if (!open_next_playable_from(0, autoplay_if_queue_was_empty)) {
             clear_queue("The selected audio files could not be opened by the playback engine.");
         }
     }
@@ -431,7 +542,8 @@ auto AppController::on_open_files_requested() -> void
     append_queue_from_paths(
         paths,
         queue_.empty() ? describe_source(paths.front().parent_path(), paths.size())
-                       : describe_append_source(paths.front().parent_path(), paths.size()));
+                       : describe_append_source(paths.front().parent_path(), paths.size()),
+        true);
 }
 
 auto AppController::on_open_folder_requested() -> void
@@ -821,6 +933,24 @@ auto AppController::rebuild_lyric_model() -> void
     } else {
         window_->set_next_lyric_hint(to_shared("Next: ..."));
     }
+}
+
+auto AppController::load_session_state() -> void
+{
+    const auto state = load_session_state_from_disk();
+    player_.set_volume(state.volume);
+    window_->set_volume(player_.volume());
+
+    if (state.queue_paths.empty()) {
+        return;
+    }
+
+    append_queue_from_paths(state.queue_paths, describe_restore_source(state.queue_paths.size()), false);
+}
+
+auto AppController::save_session_state() const -> void
+{
+    save_session_state_to_disk(player_.volume(), queue_);
 }
 
 auto AppController::sync_lyrics_to_position() -> void

@@ -27,7 +27,9 @@ private:
         const std::vector<std::filesystem::path> &paths, const std::string &source_description)
         -> void;
     auto append_queue_from_paths(
-        const std::vector<std::filesystem::path> &paths, const std::string &source_description)
+        const std::vector<std::filesystem::path> &paths,
+        const std::string &source_description,
+        bool autoplay_if_queue_was_empty)
         -> void;
     auto clear_queue(const std::string &message) -> void;
     auto open_track_at(std::size_t index, bool autoplay) -> bool;
@@ -55,6 +57,8 @@ private:
     auto rebuild_cover_tags() -> void;
     auto load_lyrics_for_current_track() -> void;
     auto rebuild_lyric_model() -> void;
+    auto load_session_state() -> void;
+    auto save_session_state() const -> void;
     auto sync_lyrics_to_position() -> void;
     auto refresh_cover_image() -> void;
     auto refresh_now_playing() -> void;
