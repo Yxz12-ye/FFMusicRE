@@ -31,6 +31,7 @@ export component AppWindow inherits Window {
     in-out property <float> progress: 0.295;
     in-out property <float> volume: 0.68;
     in-out property <bool> playing: true;
+    in-out property <bool> queue-visible: true;
     in-out property <[ModeOption]> playback-modes: [
         { label: "Sequence", active: true },
         { label: "Shuffle", active: false },
@@ -327,6 +328,12 @@ export component AppWindow inherits Window {
                                                         }
                                                     }
                                                 }
+
+                                                TransportButton {
+                                                    icon-source: MusicIcons.song-list;
+                                                    accent: root.queue-visible;
+                                                    clicked => { root.toggle-queue-visibility(); }
+                                                }
                                             }
                                         }
                                     }
@@ -455,7 +462,7 @@ export component AppWindow inherits Window {
                     }
                 }
 
-                right-column := Rectangle {
+                if root.queue-visible : right-column := Rectangle {
                     background: transparent;
                     preferred-width: 452px;
                     min-width: 360px;
@@ -600,7 +607,7 @@ export component AppWindow inherits Window {
 
                                 MusicChip {
                                     label: "Queue visible";
-                                    active: false;
+                                    active: root.queue-visible;
                                     inactive-background: transparent;
                                     inactive-foreground: MusicPalette.accent;
                                     clicked => { root.toggle-queue-visibility(); }

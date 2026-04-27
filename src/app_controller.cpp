@@ -647,6 +647,7 @@ auto AppController::refresh_transport_state() -> void
 auto AppController::refresh_queue_labels() -> void
 {
     const auto count = queue_.size();
+    window_->set_queue_visible(queue_visible_);
     window_->set_queue_loaded_label(to_shared(std::to_string(count) + " loaded"));
 
     std::string subtitle;
