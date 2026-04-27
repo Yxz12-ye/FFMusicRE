@@ -82,6 +82,13 @@ auto describe_source(const std::filesystem::path &path, std::size_t count) -> st
     return "Loaded " + std::to_string(count) + " " + track_word + " from " + name + ".";
 }
 
+auto describe_append_source(const std::filesystem::path &path, std::size_t count) -> std::string
+{
+    const auto name = path.empty() ? std::string("selection") : utf8_from_path(path.filename());
+    const auto track_word = count == 1 ? "track" : "tracks";
+    return "Added " + std::to_string(count) + " " + track_word + " from " + name + ".";
+}
+
 auto read_taglib_string(const TagLib::String &value) -> std::string
 {
     return value.to8Bit(true);
@@ -297,6 +304,46 @@ auto AppController::load_queue_from_paths(
     }
 }
 
+auto AppController::append_queue_from_paths(
+    const std::vector<std::filesystem::path> &paths, const std::string &source_description) -> void
+{
+    std::vector<Track> appended_tracks;
+    appended_tracks.reserve(paths.size());
+
+    for (const auto &path : paths) {
+        if (is_supported_audio_file(path)) {
+            appended_tracks.push_back(load_track_metadata(path));
+        }
+    }
+
+    if (appended_tracks.empty()) {
+        if (queue_.empty()) {
+            clear_queue("No supported audio files were found.");
+        }
+        return;
+    }
+
+    const bool queue_was_empty = queue_.empty();
+    queue_.insert(queue_.end(), appended_tracks.begin(), appended_tracks.end());
+
+    if (queue_was_empty) {
+        current_index_ = 0;
+        current_source_ = queue_.front().path.parent_path();
+    }
+
+    source_description_ = source_description;
+    rebuild_queue_model();
+    refresh_queue_labels();
+    rebuild_cover_tags();
+
+    if (queue_was_empty) {
+        load_lyrics_for_current_track();
+        if (!open_next_playable_from(0, true)) {
+            clear_queue("The selected audio files could not be opened by the playback engine.");
+        }
+    }
+}
+
 auto AppController::clear_queue(const std::string &message) -> void
 {
     player_.clear();
@@ -376,8 +423,10 @@ auto AppController::on_open_files_requested() -> void
         return;
     }
 
-    const std::string source = describe_source(paths.front().parent_path(), paths.size());
-    load_queue_from_paths(paths, source);
+    append_queue_from_paths(
+        paths,
+        queue_.empty() ? describe_source(paths.front().parent_path(), paths.size())
+                       : describe_append_source(paths.front().parent_path(), paths.size()));
 }
 
 auto AppController::on_open_folder_requested() -> void

@@ -26,6 +26,9 @@ private:
     auto load_queue_from_paths(
         const std::vector<std::filesystem::path> &paths, const std::string &source_description)
         -> void;
+    auto append_queue_from_paths(
+        const std::vector<std::filesystem::path> &paths, const std::string &source_description)
+        -> void;
     auto clear_queue(const std::string &message) -> void;
     auto open_track_at(std::size_t index, bool autoplay) -> bool;
     auto open_next_playable_from(std::size_t start_index, bool autoplay) -> bool;
