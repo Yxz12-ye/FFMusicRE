@@ -425,11 +425,11 @@ export component AppWindow inherits Window {
                                         spacing: 14px;
                                         alignment: stretch;
 
-                                        Flickable {
+                                        lyric-flick := Flickable {
                                             vertical-stretch: 1;
-                                            // clip: true;
+                                            viewport-width: self.width;
 
-                                            VerticalLayout {
+                                            lyric-list := VerticalLayout {
                                                 width: parent.width;
                                                 spacing: 14px;
                                                 alignment: start;
@@ -439,7 +439,35 @@ export component AppWindow inherits Window {
                                                     active: line.active;
                                                     muted: line.muted;
                                                     clicked => { root.lyric-line-selected(index); }
+
+                                                    scroll-to-active := Timer {
+                                                        interval: 1ms;
+                                                        running: false;
+
+                                                        triggered => {
+                                                            self.stop();
+                                                            lyric-flick.viewport-y = min(
+                                                                0px,
+                                                                max(
+                                                                    lyric-flick.height - lyric-flick.viewport-height,
+                                                                    lyric-flick.height / 2 - parent.y - parent.height / 2
+                                                                )
+                                                            );
+                                                        }
+                                                    }
+
+                                                    init => {
+                                                        if (line.active) {
+                                                            scroll-to-active.start();
+                                                        }
+                                                    }
                                                 }
+                                            }
+
+                                            viewport-height: max(lyric-flick.height, lyric-list.preferred-height);
+
+                                            animate viewport-y {
+                                                duration: 180ms;
                                             }
                                         }
 
