@@ -135,6 +135,28 @@ auto session_state_path() -> std::filesystem::path
     return base.empty() ? std::filesystem::path {} : base / "FFMusicRE" / "history.txt";
 }
 
+auto executable_directory() -> std::filesystem::path
+{
+#ifdef _WIN32
+    std::wstring buffer(32768, L'\0');
+    const DWORD length = GetModuleFileNameW(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()));
+    if (length == 0 || length >= buffer.size()) {
+        return {};
+    }
+
+    buffer.resize(length);
+    return std::filesystem::path(buffer).parent_path();
+#else
+    return std::filesystem::current_path();
+#endif
+}
+
+auto default_background_image_path() -> std::filesystem::path
+{
+    const auto base = executable_directory();
+    return base.empty() ? std::filesystem::path {} : base / "background.png";
+}
+
 auto load_session_state_from_disk() -> SessionState
 {
     SessionState state;
@@ -340,6 +362,7 @@ auto AppController::initialize() -> void
     rebuild_playback_mode_model();
     clear_queue("Choose a file or folder to start playback.");
     window_->set_volume(player_.volume());
+    load_background_image();
     load_session_state();
     start_ui_timer();
 }
@@ -933,6 +956,18 @@ auto AppController::rebuild_lyric_model() -> void
     } else {
         window_->set_next_lyric_hint(to_shared("Next: ..."));
     }
+}
+
+auto AppController::load_background_image() -> void
+{
+    const auto path = default_background_image_path();
+    std::error_code error;
+    if (path.empty() || !std::filesystem::exists(path, error) || error) {
+        window_->set_background_image(slint::Image());
+        return;
+    }
+
+    window_->set_background_image(slint::Image::load_from_path(to_shared(utf8_from_path(path))));
 }
 
 auto AppController::load_session_state() -> void

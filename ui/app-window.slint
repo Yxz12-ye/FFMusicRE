@@ -32,6 +32,7 @@ export component AppWindow inherits Window {
     in-out property <float> volume: 0.68;
     in-out property <bool> playing: true;
     in-out property <bool> queue-visible: true;
+    in-out property <image> background-image;
     in-out property <image> cover-image;
     in-out property <[ModeOption]> playback-modes: [
         { label: "顺序播放", active: true },
@@ -78,6 +79,14 @@ export component AppWindow inherits Window {
         width: parent.width;
         height: parent.height;
         background: @linear-gradient(180deg, MusicPalette.app-background-start, MusicPalette.app-background-end);
+
+        Image {
+            width: parent.width;
+            height: parent.height;
+            source: root.background-image;
+            image-fit: cover;
+            opacity: 0.42;
+        }
 
         shell := Rectangle {
             x: 0px;

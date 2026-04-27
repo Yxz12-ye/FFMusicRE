@@ -57,6 +57,7 @@ private:
     auto rebuild_cover_tags() -> void;
     auto load_lyrics_for_current_track() -> void;
     auto rebuild_lyric_model() -> void;
+    auto load_background_image() -> void;
     auto load_session_state() -> void;
     auto save_session_state() const -> void;
     auto sync_lyrics_to_position() -> void;
