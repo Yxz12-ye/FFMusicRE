@@ -8,6 +8,7 @@ export component QueueItem inherits Rectangle {
     in property <string> duration;
     in property <bool> active: false;
     callback clicked;
+    callback secondary-clicked;
 
     min-height: 68px;
     max-height: 68px;
@@ -21,6 +22,7 @@ export component QueueItem inherits Rectangle {
         height: 100%;
         mouse-cursor: pointer;
         clicked => { root.clicked(); }
+        secondary-clicked => { root.secondary-clicked(); }
     }
 
     HorizontalLayout {

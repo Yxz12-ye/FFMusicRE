@@ -39,6 +39,7 @@ private:
     auto on_previous_track_requested() -> void;
     auto on_next_track_requested() -> void;
     auto on_queue_item_selected(int index) -> void;
+    auto on_queue_item_remove_requested(int index) -> void;
     auto on_seek_requested(float value) -> void;
     auto on_volume_requested(float value) -> void;
     auto on_playback_mode_selected(int index) -> void;

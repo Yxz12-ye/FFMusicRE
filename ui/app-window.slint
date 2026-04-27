@@ -63,6 +63,7 @@ export component AppWindow inherits Window {
     callback clear-queue-requested();
     callback open-folder();
     callback queue-item-selected(int);
+    callback queue-item-remove-requested(int);
     callback lyric-line-selected(int);
     callback toggle-queue-visibility();
     callback toggle-sync();
@@ -597,6 +598,7 @@ export component AppWindow inherits Window {
                                             duration: track.duration;
                                             active: track.active;
                                             clicked => { root.queue-item-selected(index); }
+                                            secondary-clicked => { root.queue-item-remove-requested(index); }
                                         }
                                     }
 

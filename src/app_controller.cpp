@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <cctype>
 #include <chrono>
+#include <cstddef>
 #include <iomanip>
 #include <limits>
 #include <optional>
@@ -249,6 +250,9 @@ auto AppController::bind_callbacks() -> void
     window_->on_seek_requested([this](float value) { on_seek_requested(value); });
     window_->on_volume_requested([this](float value) { on_volume_requested(value); });
     window_->on_queue_item_selected([this](int index) { on_queue_item_selected(index); });
+    window_->on_queue_item_remove_requested([this](int index) {
+        on_queue_item_remove_requested(index);
+    });
     window_->on_playback_mode_selected([this](int index) { on_playback_mode_selected(index); });
     window_->on_toggle_queue_visibility([this] { on_toggle_queue_visibility_requested(); });
     window_->on_toggle_sync([this] { on_toggle_sync_requested(); });
@@ -506,6 +510,44 @@ auto AppController::on_queue_item_selected(int index) -> void
     }
 
     select_track(static_cast<std::size_t>(index), true);
+}
+
+auto AppController::on_queue_item_remove_requested(int index) -> void
+{
+    if (index < 0) {
+        return;
+    }
+
+    const std::size_t remove_index = static_cast<std::size_t>(index);
+    if (remove_index >= queue_.size()) {
+        return;
+    }
+
+    const bool removing_current_track = remove_index == current_index_;
+    const bool autoplay = player_.status() == AudioPlayer::Status::Playing;
+
+    queue_.erase(queue_.begin() + static_cast<std::ptrdiff_t>(remove_index));
+
+    if (queue_.empty()) {
+        clear_queue("Queue cleared.");
+        return;
+    }
+
+    if (remove_index < current_index_) {
+        --current_index_;
+    }
+
+    if (!removing_current_track) {
+        rebuild_queue_model();
+        refresh_queue_labels();
+        rebuild_cover_tags();
+        return;
+    }
+
+    const std::size_t next_index = std::min(remove_index, queue_.size() - 1);
+    if (!open_track_at(next_index, autoplay) && !open_next_playable_from(next_index, autoplay)) {
+        clear_queue("The remaining audio files could not be opened by the playback engine.");
+    }
 }
 
 auto AppController::on_seek_requested(float value) -> void
