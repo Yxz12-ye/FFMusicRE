@@ -5,6 +5,7 @@ export component ActionCard inherits Rectangle {
     in property <string> title;
     in property <string> subtitle;
     callback clicked;
+    callback secondary-clicked;
 
     min-height: 82px;
     min-width: 150px;
@@ -19,6 +20,7 @@ export component ActionCard inherits Rectangle {
         height: 100%;
         mouse-cursor: pointer;
         clicked => { root.clicked(); }
+        secondary-clicked => { root.secondary-clicked(); }
     }
 
     VerticalLayout {

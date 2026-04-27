@@ -241,6 +241,7 @@ auto AppController::initialize() -> void
 auto AppController::bind_callbacks() -> void
 {
     window_->on_open_file([this] { on_open_files_requested(); });
+    window_->on_clear_queue_requested([this] { on_clear_queue_requested(); });
     window_->on_open_folder([this] { on_open_folder_requested(); });
     window_->on_toggle_play([this] { on_toggle_play_requested(); });
     window_->on_previous_track([this] { on_previous_track_requested(); });
@@ -445,6 +446,11 @@ auto AppController::on_open_folder_requested() -> void
     }
 
     load_queue_from_paths(paths, describe_source(*folder, paths.size()));
+}
+
+auto AppController::on_clear_queue_requested() -> void
+{
+    clear_queue("Queue cleared.");
 }
 
 auto AppController::on_toggle_play_requested() -> void

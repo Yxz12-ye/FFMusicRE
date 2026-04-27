@@ -60,6 +60,7 @@ export component AppWindow inherits Window {
     callback volume-requested(float);
     callback playback-mode-selected(int);
     callback open-file();
+    callback clear-queue-requested();
     callback open-folder();
     callback queue-item-selected(int);
     callback lyric-line-selected(int);
@@ -563,6 +564,7 @@ export component AppWindow inherits Window {
                                     title: "打开文件";
                                     subtitle: "导入一首歌";
                                     clicked => { root.open-file(); }
+                                    secondary-clicked => { root.clear-queue-requested(); }
                                 }
 
                                 ActionCard {

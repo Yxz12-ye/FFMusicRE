@@ -33,6 +33,7 @@ private:
     auto open_track_at(std::size_t index, bool autoplay) -> bool;
     auto open_next_playable_from(std::size_t start_index, bool autoplay) -> bool;
     auto on_open_files_requested() -> void;
+    auto on_clear_queue_requested() -> void;
     auto on_open_folder_requested() -> void;
     auto on_toggle_play_requested() -> void;
     auto on_previous_track_requested() -> void;

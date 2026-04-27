@@ -7,6 +7,7 @@ export component FocusTouchArea {
     in property <MouseCursor> mouse-cursor <=> touch-area.mouse-cursor;
 
     callback clicked <=> touch-area.clicked;
+    callback secondary-clicked;
 
     forward-focus: focus-scope;
 
@@ -47,5 +48,18 @@ export component FocusTouchArea {
 
     touch-area := TouchArea {
         enabled: root.enabled;
+
+        pointer-event(event) => {
+            if !root.enabled {
+                return reject;
+            }
+
+            if event.button == PointerEventButton.right && event.kind == PointerEventKind.up {
+                root.secondary-clicked();
+                return accept;
+            }
+
+            reject
+        }
     }
 }
