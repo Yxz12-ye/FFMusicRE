@@ -51,6 +51,7 @@ private:
     auto load_lyrics_for_current_track() -> void;
     auto rebuild_lyric_model() -> void;
     auto sync_lyrics_to_position() -> void;
+    auto refresh_cover_image() -> void;
     auto refresh_now_playing() -> void;
     auto refresh_transport_state() -> void;
     auto refresh_queue_labels() -> void;

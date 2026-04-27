@@ -32,6 +32,7 @@ export component AppWindow inherits Window {
     in-out property <float> volume: 0.68;
     in-out property <bool> playing: true;
     in-out property <bool> queue-visible: true;
+    in-out property <image> cover-image;
     in-out property <[ModeOption]> playback-modes: [
         { label: "Sequence", active: true },
         { label: "Shuffle", active: false },
@@ -142,7 +143,7 @@ export component AppWindow inherits Window {
                                                 Image {
                                                     width: parent.width;
                                                     height: parent.height;
-                                                    source: @image-url("images/generated-1777196145294.png");
+                                                    source: root.cover-image;
                                                     image-fit: cover;
                                                 }
                                             }

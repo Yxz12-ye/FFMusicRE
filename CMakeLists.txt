@@ -49,10 +49,10 @@ if(NOT TARGET Slint::Slint)
     find_package(Slint REQUIRED)
 endif()
 
-find_package(SFML COMPONENTS Audio REQUIRED)
+find_package(SFML COMPONENTS Audio Graphics REQUIRED)
 find_package(taglib CONFIG REQUIRED)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Slint::Slint SFML::Audio TagLib::tag)
+target_link_libraries(${PROJECT_NAME} PRIVATE Slint::Slint SFML::Audio SFML::Graphics TagLib::tag)
 if(ENABLE_WARNINGS)
     target_link_libraries(${PROJECT_NAME} PRIVATE project_warnings)
 endif()

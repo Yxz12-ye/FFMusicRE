@@ -3,10 +3,17 @@
 #include "lrc.h"
 #include "platform_dialogs.h"
 
+#include <SFML/Graphics/Image.hpp>
+#include <taglib/fileref.h>
+#include <taglib/tbytevector.h>
+#include <taglib/tstring.h>
+#include <taglib/tvariant.h>
+
 #include <algorithm>
 #include <cctype>
 #include <chrono>
 #include <iomanip>
+#include <limits>
 #include <optional>
 #include <sstream>
 
@@ -73,6 +80,122 @@ auto describe_source(const std::filesystem::path &path, std::size_t count) -> st
     const auto name = path.empty() ? std::string("selection") : utf8_from_path(path.filename());
     const auto track_word = count == 1 ? "track" : "tracks";
     return "Loaded " + std::to_string(count) + " " + track_word + " from " + name + ".";
+}
+
+auto read_taglib_string(const TagLib::String &value) -> std::string
+{
+    return value.to8Bit(true);
+}
+
+auto read_variant_string(const TagLib::VariantMap &properties, const char *key) -> std::string
+{
+    const TagLib::String property_key(key, TagLib::String::Latin1);
+    if (!properties.contains(property_key)) {
+        return {};
+    }
+
+    bool ok = false;
+    const auto value = properties[property_key].toString(&ok);
+    return ok ? read_taglib_string(value) : std::string {};
+}
+
+auto read_variant_bytes(const TagLib::VariantMap &properties, const char *key) -> TagLib::ByteVector
+{
+    const TagLib::String property_key(key, TagLib::String::Latin1);
+    if (!properties.contains(property_key)) {
+        return {};
+    }
+
+    bool ok = false;
+    const auto value = properties[property_key].toByteVector(&ok);
+    return ok ? value : TagLib::ByteVector {};
+}
+
+auto cover_priority(const std::string &picture_type) -> int
+{
+    const std::string lowered = uppercase_ascii(picture_type);
+    if (lowered == "FRONT COVER") {
+        return 0;
+    }
+    if (lowered == "COVER (FRONT)") {
+        return 0;
+    }
+    if (lowered == "MEDIA") {
+        return 1;
+    }
+    if (lowered == "LEAFLET PAGE") {
+        return 2;
+    }
+    return 3;
+}
+
+auto decode_cover_image(const TagLib::ByteVector &bytes) -> std::optional<slint::Image>
+{
+    if (bytes.isEmpty()) {
+        return std::nullopt;
+    }
+
+    sf::Image decoded_image;
+    if (!decoded_image.loadFromMemory(bytes.data(), bytes.size())) {
+        return std::nullopt;
+    }
+
+    const auto size = decoded_image.getSize();
+    const auto *pixels = decoded_image.getPixelsPtr();
+    if (size.x == 0 || size.y == 0 || pixels == nullptr) {
+        return std::nullopt;
+    }
+
+    slint::SharedPixelBuffer<slint::Rgba8Pixel> pixel_buffer(size.x, size.y);
+    auto *output = pixel_buffer.begin();
+    const std::size_t pixel_count = static_cast<std::size_t>(size.x) * static_cast<std::size_t>(size.y);
+
+    for (std::size_t index = 0; index < pixel_count; ++index) {
+        const std::size_t offset = index * 4;
+        output[index] = slint::Rgba8Pixel {
+            pixels[offset],
+            pixels[offset + 1],
+            pixels[offset + 2],
+            pixels[offset + 3],
+        };
+    }
+
+    return slint::Image(pixel_buffer);
+}
+
+auto load_embedded_cover_image(const std::filesystem::path &path) -> std::optional<slint::Image>
+{
+    TagLib::FileRef file_ref(path.c_str());
+    if (file_ref.isNull()) {
+        return std::nullopt;
+    }
+
+    const auto pictures = file_ref.complexProperties(TagLib::String("PICTURE", TagLib::String::Latin1));
+
+    const TagLib::VariantMap *best_picture = nullptr;
+    int best_priority = std::numeric_limits<int>::max();
+
+    for (const auto &picture : pictures) {
+        const auto picture_data = read_variant_bytes(picture, "data");
+        if (picture_data.isEmpty()) {
+            continue;
+        }
+
+        const int priority = cover_priority(read_variant_string(picture, "pictureType"));
+        if (best_picture == nullptr || priority < best_priority) {
+            best_picture = &picture;
+            best_priority = priority;
+            if (priority == 0) {
+                break;
+            }
+        }
+    }
+
+    if (best_picture == nullptr) {
+        return std::nullopt;
+    }
+
+    return decode_cover_image(read_variant_bytes(*best_picture, "data"));
 }
 
 auto placeholder_lyrics(const Track *track) -> std::vector<LyricLineData>
@@ -198,6 +321,7 @@ auto AppController::clear_queue(const std::string &message) -> void
     window_->set_song_artist(to_shared("Import audio to begin"));
     // window_->set_song_meta(to_shared("SFML playback core  ·  TagLib metadata"));
     window_->set_format_label(to_shared("No file"));
+    window_->set_cover_image(slint::Image());
     // window_->set_collection_note(to_shared(message));
     window_->set_elapsed_label(to_shared("00:00"));
     window_->set_duration_label(to_shared("00:00"));
@@ -220,6 +344,7 @@ auto AppController::open_track_at(std::size_t index, bool autoplay) -> bool
     current_index_ = index;
     player_.set_looping(playback_mode_ == PlaybackMode::RepeatOne);
     last_status_ = player_.status();
+    refresh_cover_image();
     refresh_now_playing();
     rebuild_queue_model();
     rebuild_cover_tags();
@@ -498,6 +623,22 @@ auto AppController::rebuild_cover_tags() -> void
     //     TagData { to_shared(std::to_string(queue_.size()) + " loaded"), false });
 
     // window_->set_cover_tags(std::make_shared<slint::VectorModel<TagData>>(items));
+}
+
+auto AppController::refresh_cover_image() -> void
+{
+    const auto *track = current_track();
+    if (track == nullptr) {
+        window_->set_cover_image(slint::Image());
+        return;
+    }
+
+    if (const auto cover_image = load_embedded_cover_image(track->path)) {
+        window_->set_cover_image(*cover_image);
+        return;
+    }
+
+    window_->set_cover_image(slint::Image());
 }
 
 auto AppController::load_lyrics_for_current_track() -> void
