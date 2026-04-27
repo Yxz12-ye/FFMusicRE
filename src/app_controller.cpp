@@ -988,21 +988,25 @@ auto AppController::load_background_image() -> void
     std::error_code error;
     if (path.empty() || !std::filesystem::exists(path, error) || error) {
         window_->set_background_image(slint::Image());
+        window_->set_has_background_image(false);
         return;
     }
 
     sf::Image decoded_image;
     if (!decoded_image.loadFromFile(path.string())) {
         window_->set_background_image(slint::Image());
+        window_->set_has_background_image(false);
         return;
     }
 
     if (const auto background_image = slint_image_from_sf_image(decoded_image)) {
         window_->set_background_image(*background_image);
+        window_->set_has_background_image(true);
         return;
     }
 
     window_->set_background_image(slint::Image());
+    window_->set_has_background_image(false);
 }
 
 auto AppController::load_session_state() -> void

@@ -32,6 +32,7 @@ export component AppWindow inherits Window {
     in-out property <float> volume: 0.68;
     in-out property <bool> playing: true;
     in-out property <bool> queue-visible: true;
+    in-out property <bool> has-background-image: false;
     in-out property <image> background-image;
     in-out property <image> cover-image;
     in-out property <[ModeOption]> playback-modes: [
@@ -94,7 +95,7 @@ export component AppWindow inherits Window {
             width: parent.width;
             height: parent.height;
             border-radius: 28px;
-            background: MusicPalette.shell;
+            background: root.has-background-image ? transparent : MusicPalette.shell;
             clip: true;
             drop-shadow-offset-x: 0px;
             drop-shadow-offset-y: 20px;
