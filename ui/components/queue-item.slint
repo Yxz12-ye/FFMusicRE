@@ -9,7 +9,8 @@ export component QueueItem inherits Rectangle {
     in property <bool> active: false;
     callback clicked;
 
-    min-height: 72px;
+    min-height: 68px;
+    max-height: 68px;
     border-radius: 18px;
     background: root.active ? MusicPalette.surface-selected : MusicPalette.surface-1;
     clip: true;

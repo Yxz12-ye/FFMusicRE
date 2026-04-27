@@ -7,6 +7,7 @@ import { MeterBar } from "./components/meter-bar.slint";
 import { ActionCard } from "./components/action-card.slint";
 import { QueueItem } from "./components/queue-item.slint";
 import { LyricLine } from "./components/lyric-line.slint";
+import { ScrollView } from "std-widgets.slint";
 
 export component AppWindow inherits Window {
     title: "FFMusicRE";
@@ -541,6 +542,7 @@ export component AppWindow inherits Window {
                             Rectangle {
                                 background: MusicPalette.surface-1;
                                 border-radius: 18px;
+                                vertical-stretch: 0;
 
                                 VerticalLayout {
                                     padding: 16px;
@@ -578,6 +580,7 @@ export component AppWindow inherits Window {
                             HorizontalLayout {
                                 spacing: 12px;
                                 alignment: stretch;
+                                vertical-stretch: 0;
 
                                 ActionCard {
                                     horizontal-stretch: 1;
@@ -598,18 +601,29 @@ export component AppWindow inherits Window {
                                 background: transparent;
                                 vertical-stretch: 1;
 
-                                VerticalLayout {
-                                    spacing: 10px;
-                                    alignment: stretch;
+                                queue-scroll := ScrollView {
+                                    width: parent.width;
+                                    height: parent.height;
+                                    vertical-scrollbar-policy: ScrollBarPolicy.as-needed;
+                                    horizontal-scrollbar-policy: ScrollBarPolicy.always-off;
 
-                                    for track[index] in root.queue-model : QueueItem {
-                                        order: track.order;
-                                        title: track.title;
-                                        artist: track.artist;
-                                        duration: track.duration;
-                                        active: track.active;
-                                        clicked => { root.queue-item-selected(index); }
+                                    queue-list := VerticalLayout {
+                                        width: queue-scroll.visible-width;
+                                        spacing: 10px;
+                                        alignment: stretch;
+
+                                        for track[index] in root.queue-model : QueueItem {
+                                            order: track.order;
+                                            title: track.title;
+                                            artist: track.artist;
+                                            duration: track.duration;
+                                            active: track.active;
+                                            clicked => { root.queue-item-selected(index); }
+                                        }
                                     }
+
+                                    viewport-width: queue-scroll.visible-width;
+                                    viewport-height: max(queue-scroll.visible-height, queue-list.preferred-height);
                                 }
                             }
 
