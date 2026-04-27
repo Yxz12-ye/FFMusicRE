@@ -33,7 +33,12 @@ file(GLOB_RECURSE PROJECT_SOURCE CONFIGURE_DEPENDS
     src/*.h
 )
 
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCE})
+set(WINDOWS_RESOURCE_FILES)
+if(WIN32)
+    list(APPEND WINDOWS_RESOURCE_FILES src/app_icon.rc)
+endif()
+
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCE} ${WINDOWS_RESOURCE_FILES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_compile_definitions(${PROJECT_NAME} PRIVATE TAGLIB_STATIC)
@@ -60,7 +65,7 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY SLINT_EMBED_RESOURCES embed-files)
 slint_target_sources(${PROJECT_NAME} ui/app-window.slint)
 
 if(WIN32)
-    set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+    # set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
     target_link_libraries(${PROJECT_NAME} PRIVATE Ole32 Shell32 Uuid)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}>
