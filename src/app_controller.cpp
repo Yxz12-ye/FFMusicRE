@@ -154,7 +154,26 @@ auto executable_directory() -> std::filesystem::path
 auto default_background_image_path() -> std::filesystem::path
 {
     const auto base = executable_directory();
-    return base.empty() ? std::filesystem::path {} : base / "background.png";
+    if (base.empty()) {
+        return {};
+    }
+
+    static constexpr std::string_view candidate_names[] {
+        "background.png",
+        "background.jpg",
+        "background.jpeg",
+    };
+
+    std::error_code error;
+    for (const auto candidate_name : candidate_names) {
+        const auto candidate_path = base / candidate_name;
+        if (std::filesystem::exists(candidate_path, error) && !error) {
+            return candidate_path;
+        }
+        error.clear();
+    }
+
+    return base / "background.png";
 }
 
 auto load_session_state_from_disk() -> SessionState
@@ -263,17 +282,8 @@ auto cover_priority(const std::string &picture_type) -> int
     return 3;
 }
 
-auto decode_cover_image(const TagLib::ByteVector &bytes) -> std::optional<slint::Image>
+auto slint_image_from_sf_image(const sf::Image &decoded_image) -> std::optional<slint::Image>
 {
-    if (bytes.isEmpty()) {
-        return std::nullopt;
-    }
-
-    sf::Image decoded_image;
-    if (!decoded_image.loadFromMemory(bytes.data(), bytes.size())) {
-        return std::nullopt;
-    }
-
     const auto size = decoded_image.getSize();
     const auto *pixels = decoded_image.getPixelsPtr();
     if (size.x == 0 || size.y == 0 || pixels == nullptr) {
@@ -295,6 +305,20 @@ auto decode_cover_image(const TagLib::ByteVector &bytes) -> std::optional<slint:
     }
 
     return slint::Image(pixel_buffer);
+}
+
+auto decode_cover_image(const TagLib::ByteVector &bytes) -> std::optional<slint::Image>
+{
+    if (bytes.isEmpty()) {
+        return std::nullopt;
+    }
+
+    sf::Image decoded_image;
+    if (!decoded_image.loadFromMemory(bytes.data(), bytes.size())) {
+        return std::nullopt;
+    }
+
+    return slint_image_from_sf_image(decoded_image);
 }
 
 auto load_embedded_cover_image(const std::filesystem::path &path) -> std::optional<slint::Image>
@@ -967,7 +991,18 @@ auto AppController::load_background_image() -> void
         return;
     }
 
-    window_->set_background_image(slint::Image::load_from_path(to_shared(utf8_from_path(path))));
+    sf::Image decoded_image;
+    if (!decoded_image.loadFromFile(path.string())) {
+        window_->set_background_image(slint::Image());
+        return;
+    }
+
+    if (const auto background_image = slint_image_from_sf_image(decoded_image)) {
+        window_->set_background_image(*background_image);
+        return;
+    }
+
+    window_->set_background_image(slint::Image());
 }
 
 auto AppController::load_session_state() -> void
