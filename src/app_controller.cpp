@@ -187,18 +187,18 @@ auto AppController::clear_queue(const std::string &message) -> void
     last_status_ = AudioPlayer::Status::Stopped;
 
     window_->set_queue_model(std::make_shared<slint::VectorModel<QueueTrack>>(std::vector<QueueTrack> {}));
-    window_->set_cover_tags(std::make_shared<slint::VectorModel<TagData>>(std::vector<TagData> {
-        TagData { to_shared("Ready"), true },
-        TagData { to_shared("0 loaded"), false },
-    }));
+    // window_->set_cover_tags(std::make_shared<slint::VectorModel<TagData>>(std::vector<TagData> {
+    //     TagData { to_shared("Ready"), true },
+    //     TagData { to_shared("0 loaded"), false },
+    // }));
     window_->set_lyric_model(std::make_shared<slint::VectorModel<LyricLineData>>(placeholder_lyrics(nullptr)));
     window_->set_lyrics_subtitle(to_shared("Centered on the current phrase for low-distraction reading."));
     window_->set_next_lyric_hint(to_shared("Next: Load music"));
     window_->set_song_title(to_shared("No track loaded"));
     window_->set_song_artist(to_shared("Import audio to begin"));
-    window_->set_song_meta(to_shared("SFML playback core  ·  TagLib metadata"));
+    // window_->set_song_meta(to_shared("SFML playback core  ·  TagLib metadata"));
     window_->set_format_label(to_shared("No file"));
-    window_->set_collection_note(to_shared(message));
+    // window_->set_collection_note(to_shared(message));
     window_->set_elapsed_label(to_shared("00:00"));
     window_->set_duration_label(to_shared("00:00"));
     window_->set_progress(0.0f);
@@ -265,7 +265,7 @@ auto AppController::on_open_folder_requested() -> void
     auto paths = scan_audio_files(*folder);
     if (paths.empty()) {
         clear_queue("No supported audio files were found in the selected folder.");
-        window_->set_collection_note(to_shared("No supported audio files were found in the selected folder."));
+        // window_->set_collection_note(to_shared("No supported audio files were found in the selected folder."));
         window_->set_queue_subtitle(to_shared("Selected folder contains no supported audio files."));
         return;
     }
@@ -486,18 +486,18 @@ auto AppController::rebuild_playback_mode_model() -> void
 
 auto AppController::rebuild_cover_tags() -> void
 {
-    std::vector<TagData> items;
+    // std::vector<TagData> items;
 
-    if (const auto *track = current_track()) {
-        items.push_back(TagData { to_shared(uppercase_ascii(track->extension)), true });
-    } else {
-        items.push_back(TagData { to_shared("Ready"), true });
-    }
+    // if (const auto *track = current_track()) {
+    //     items.push_back(TagData { to_shared(uppercase_ascii(track->extension)), true });
+    // } else {
+    //     items.push_back(TagData { to_shared("Ready"), true });
+    // }
 
-    items.push_back(
-        TagData { to_shared(std::to_string(queue_.size()) + " loaded"), false });
+    // items.push_back(
+    //     TagData { to_shared(std::to_string(queue_.size()) + " loaded"), false });
 
-    window_->set_cover_tags(std::make_shared<slint::VectorModel<TagData>>(items));
+    // window_->set_cover_tags(std::make_shared<slint::VectorModel<TagData>>(items));
 }
 
 auto AppController::load_lyrics_for_current_track() -> void
@@ -618,11 +618,11 @@ auto AppController::refresh_now_playing() -> void
 
     window_->set_song_title(to_shared(track->title));
     window_->set_song_artist(to_shared(track_artist_line(*track)));
-    window_->set_song_meta(to_shared(track_meta_line(*track)));
+    // window_->set_song_meta(to_shared(track_meta_line(*track)));
     window_->set_format_label(to_shared(track_format_label(*track)));
-    window_->set_collection_note(to_shared(source_description_.empty()
-            ? "Local file playback is active."
-            : source_description_));
+    // window_->set_collection_note(to_shared(source_description_.empty()
+    //         ? "Local file playback is active."
+    //         : source_description_));
 
     const int duration_seconds = track->duration_seconds > 0
         ? track->duration_seconds
@@ -662,7 +662,7 @@ auto AppController::refresh_queue_labels() -> void
 
 auto AppController::set_status_message(const std::string &message) -> void
 {
-    window_->set_collection_note(to_shared(message));
+    // window_->set_collection_note(to_shared(message));
 }
 
 auto AppController::current_track() const -> const Track *
