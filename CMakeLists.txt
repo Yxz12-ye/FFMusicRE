@@ -56,9 +56,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Slint::Slint SFML::Audio SFML::Gra
 if(ENABLE_WARNINGS)
     target_link_libraries(${PROJECT_NAME} PRIVATE project_warnings)
 endif()
+set_property(TARGET ${PROJECT_NAME} PROPERTY SLINT_EMBED_RESOURCES embed-files)
 slint_target_sources(${PROJECT_NAME} ui/app-window.slint)
 
 if(WIN32)
+    set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
     target_link_libraries(${PROJECT_NAME} PRIVATE Ole32 Shell32 Uuid)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}>

@@ -64,6 +64,183 @@
               "children": [
                 {
                   "type": "frame",
+                  "id": "qS0yr",
+                  "name": "lyricsPanel",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": 24,
+                  "layout": "vertical",
+                  "gap": 18,
+                  "padding": 24,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "4TUTv",
+                      "name": "lyricsHead",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "pIOdp",
+                          "name": "lyricsTitleWrap",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "JPNkB",
+                              "fill": "$text",
+                              "content": "Lyrics",
+                              "fontFamily": "Funnel Sans",
+                              "fontSize": 26,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "4DKIz",
+                              "fill": "$text-soft",
+                              "textGrowth": "fixed-width",
+                              "width": 420,
+                              "content": "Centered on the current phrase for low-distraction reading.",
+                              "fontFamily": "Geist",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "h5tG5",
+                          "name": "lyBadge",
+                          "fill": "$surface-2",
+                          "cornerRadius": "$radius-full",
+                          "padding": [
+                            8,
+                            12
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "qU6ht",
+                              "fill": "$accent-green",
+                              "content": "Synced",
+                              "fontFamily": "IBM Plex Mono",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "14FGo",
+                      "name": "lyricBody",
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "fill": "$surface-2",
+                      "cornerRadius": 20,
+                      "layout": "vertical",
+                      "gap": 14,
+                      "padding": 24,
+                      "justifyContent": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Dzbiu",
+                          "fill": "$text-dim",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Streetlights blur into silver dust",
+                          "lineHeight": 1.25,
+                          "fontFamily": "Geist",
+                          "fontSize": 22,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "RoMGG",
+                          "fill": "$text-soft",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "You trace the night across the glass",
+                          "lineHeight": 1.25,
+                          "fontFamily": "Geist",
+                          "fontSize": 22,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "RMY26",
+                          "name": "focusLine",
+                          "width": "fill_container",
+                          "fill": "$accent-soft",
+                          "cornerRadius": 18,
+                          "layout": "vertical",
+                          "padding": [
+                            18,
+                            20
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "khVhe",
+                              "fill": "#67a6ffff",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "I hear your color breaking through the rain",
+                              "lineHeight": 1.1,
+                              "fontFamily": "Funnel Sans",
+                              "fontSize": 32,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "0ZTV8",
+                          "fill": "$text-soft",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Every quiet echo calls your name",
+                          "lineHeight": 1.25,
+                          "fontFamily": "Geist",
+                          "fontSize": 22,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "r1D3I",
+                          "fill": "$text-dim",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "And the city starts to move again",
+                          "lineHeight": 1.25,
+                          "fontFamily": "Geist",
+                          "fontSize": 22,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "3KTbV",
+                          "fill": "$accent",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Next: We stay until the morning bends",
+                          "lineHeight": 1.4,
+                          "fontFamily": "IBM Plex Mono",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
                   "id": "sfE4s",
                   "name": "hero",
                   "width": "fill_container",
@@ -455,183 +632,6 @@
                               ]
                             }
                           ]
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "qS0yr",
-                  "name": "lyricsPanel",
-                  "width": "fill_container",
-                  "height": "fill_container",
-                  "fill": "$surface",
-                  "cornerRadius": 24,
-                  "layout": "vertical",
-                  "gap": 18,
-                  "padding": 24,
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "4TUTv",
-                      "name": "lyricsHead",
-                      "width": "fill_container",
-                      "justifyContent": "space_between",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "pIOdp",
-                          "name": "lyricsTitleWrap",
-                          "layout": "vertical",
-                          "gap": 6,
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "JPNkB",
-                              "fill": "$text",
-                              "content": "Lyrics",
-                              "fontFamily": "Funnel Sans",
-                              "fontSize": 26,
-                              "fontWeight": "700"
-                            },
-                            {
-                              "type": "text",
-                              "id": "4DKIz",
-                              "fill": "$text-soft",
-                              "textGrowth": "fixed-width",
-                              "width": 420,
-                              "content": "Centered on the current phrase for low-distraction reading.",
-                              "fontFamily": "Geist",
-                              "fontSize": 14,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "h5tG5",
-                          "name": "lyBadge",
-                          "fill": "$surface-2",
-                          "cornerRadius": "$radius-full",
-                          "padding": [
-                            8,
-                            12
-                          ],
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "qU6ht",
-                              "fill": "$accent-green",
-                              "content": "Synced",
-                              "fontFamily": "IBM Plex Mono",
-                              "fontSize": 12,
-                              "fontWeight": "500"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "14FGo",
-                      "name": "lyricBody",
-                      "width": "fill_container",
-                      "height": "fill_container",
-                      "fill": "$surface-2",
-                      "cornerRadius": 20,
-                      "layout": "vertical",
-                      "gap": 14,
-                      "padding": 24,
-                      "justifyContent": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "Dzbiu",
-                          "fill": "$text-dim",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "Streetlights blur into silver dust",
-                          "lineHeight": 1.25,
-                          "fontFamily": "Geist",
-                          "fontSize": 22,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "RoMGG",
-                          "fill": "$text-soft",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "You trace the night across the glass",
-                          "lineHeight": 1.25,
-                          "fontFamily": "Geist",
-                          "fontSize": 22,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "RMY26",
-                          "name": "focusLine",
-                          "width": "fill_container",
-                          "fill": "$accent-soft",
-                          "cornerRadius": 18,
-                          "layout": "vertical",
-                          "padding": [
-                            18,
-                            20
-                          ],
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "khVhe",
-                              "fill": "#67a6ffff",
-                              "textGrowth": "fixed-width",
-                              "width": "fill_container",
-                              "content": "I hear your color breaking through the rain",
-                              "lineHeight": 1.1,
-                              "fontFamily": "Funnel Sans",
-                              "fontSize": 32,
-                              "fontWeight": "700"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "0ZTV8",
-                          "fill": "$text-soft",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "Every quiet echo calls your name",
-                          "lineHeight": 1.25,
-                          "fontFamily": "Geist",
-                          "fontSize": 22,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "r1D3I",
-                          "fill": "$text-dim",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "And the city starts to move again",
-                          "lineHeight": 1.25,
-                          "fontFamily": "Geist",
-                          "fontSize": 22,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "3KTbV",
-                          "fill": "$accent",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "Next: We stay until the morning bends",
-                          "lineHeight": 1.4,
-                          "fontFamily": "IBM Plex Mono",
-                          "fontSize": 13,
-                          "fontWeight": "normal"
                         }
                       ]
                     }
