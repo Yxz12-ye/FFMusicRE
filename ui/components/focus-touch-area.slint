@@ -50,16 +50,9 @@ export component FocusTouchArea {
         enabled: root.enabled;
 
         pointer-event(event) => {
-            if !root.enabled {
-                return reject;
-            }
-
-            if event.button == PointerEventButton.right && event.kind == PointerEventKind.up {
+            if root.enabled && event.button == PointerEventButton.right && event.kind == PointerEventKind.up {
                 root.secondary-clicked();
-                return accept;
             }
-
-            reject
         }
     }
 }
